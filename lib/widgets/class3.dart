@@ -42,10 +42,13 @@ class _Class3AnimationControllerWidgetState
   Animation<double> _floatUp;
   Animation<double> _growSize;
 
-  @override void initState() {
+  @override
+  void initState() {
     super.initState();
-    _floatUpController = AnimationController(duration: Duration(seconds: 4), vsync: this);
-    _growSizeController = AnimationController(duration: Duration(seconds: 2), vsync: this);
+    _floatUpController =
+        AnimationController(duration: Duration(seconds: 4), vsync: this);
+    _growSizeController =
+        AnimationController(duration: Duration(seconds: 2), vsync: this);
   }
 
   @override
@@ -61,7 +64,8 @@ class _Class3AnimationControllerWidgetState
     var _ballWidth = MediaQuery.of(context).size.width / 3;
     var _ballBottomLocation = MediaQuery.of(context).size.height - _ballHeight;
     _floatUp = Tween(begin: _ballBottomLocation, end: 0.0).animate(
-        CurvedAnimation(parent: _floatUpController, curve: Curves.fastOutSlowIn));
+        CurvedAnimation(
+            parent: _floatUpController, curve: Curves.fastOutSlowIn));
     _growSize = Tween(begin: 50.0, end: _ballWidth).animate(
         CurvedAnimation(parent: _growSizeController, curve: Curves.easeInOut));
     return AnimatedBuilder(
@@ -104,9 +108,11 @@ class _Class3AnimationControllerWidgetState2
   Animation<double> _floatUp;
   Animation<double> _growSize;
 
-  @override void initState() {
+  @override
+  void initState() {
     super.initState();
-    _controller = AnimationController(duration: Duration(seconds: 4), vsync: this);
+    _controller =
+        AnimationController(duration: Duration(seconds: 4), vsync: this);
   }
 
   @override
@@ -121,9 +127,12 @@ class _Class3AnimationControllerWidgetState2
     var _ballWidth = MediaQuery.of(context).size.width / 3;
     var _ballBottomLocation = MediaQuery.of(context).size.height - _ballHeight;
     _floatUp = Tween(begin: _ballBottomLocation, end: 0.0).animate(
-        CurvedAnimation(parent: _controller, curve: Interval(0.0,1.0,curve: Curves.fastOutSlowIn)));
-    _growSize = Tween(begin: 50.0, end: _ballWidth).animate(
-        CurvedAnimation(parent: _controller, curve: Interval(0.0, 1.0, curve: Curves.easeInOut)));
+        CurvedAnimation(
+            parent: _controller,
+            curve: Interval(0.0, 1.0, curve: Curves.fastOutSlowIn)));
+    _growSize = Tween(begin: 50.0, end: _ballWidth).animate(CurvedAnimation(
+        parent: _controller,
+        curve: Interval(0.0, 1.0, curve: Curves.easeInOut)));
     return AnimatedBuilder(
       animation: _floatUp,
       builder: (context, child) {
@@ -135,8 +144,10 @@ class _Class3AnimationControllerWidgetState2
       },
       child: GestureDetector(
         onTap: () {
-          if (_controller.isCompleted) _controller.reverse();
-          else _controller.forward();
+          if (_controller.isCompleted)
+            _controller.reverse();
+          else
+            _controller.forward();
         },
         child: Image.asset('asserts/images/ball.png',
             height: _ballHeight, width: _ballWidth),
@@ -155,9 +166,9 @@ class _Class3AnimatedOpacityState extends State<Class3AnimatedOpacity> {
   double _opacity = 1;
   Color _color = Colors.white;
   void _changeOpacity() => setState(() {
-    _opacity == 0.3 ? _opacity = 1 : _opacity = 0.3;
-    _color == Colors.white ? _color = Colors.black : _color = Colors.white;
-  });
+        _opacity == 0.3 ? _opacity = 1 : _opacity = 0.3;
+        _color == Colors.white ? _color = Colors.black : _color = Colors.white;
+      });
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -274,26 +285,72 @@ class _Class3AnimatedCrossFadeState extends State<Class3AnimatedCrossFade> {
           sizeCurve: Curves.bounceOut,
           duration: Duration(milliseconds: 500),
           crossFadeState:
-          _showAcorn ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+              _showAcorn ? CrossFadeState.showFirst : CrossFadeState.showSecond,
           firstChild: Container(
               width: 200,
               color: Colors.orangeAccent,
               padding: EdgeInsets.all(20),
               child: Image.asset('asserts/images/acorn.png')),
-          secondChild: Container(
-              width: 200,
-              padding: EdgeInsets.all(20),
-              color: Colors.brown,
-              child: Image.asset('asserts/images/animal.png')),
+          secondChild: GestureDetector(
+            onTap: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => AboutWidget()));
+            },
+            child: Hero(
+              tag: 'hero_animal',
+              child: Container(
+                  width: 200,
+                  padding: EdgeInsets.all(20),
+                  color: Colors.brown,
+                  child: Image.asset('asserts/images/animal.png')),
+            ),
+          ),
         ),
         pt10,
         TextButton(
             onPressed: () => setState(() => _showAcorn = !_showAcorn),
             child: Padding(
               padding: EdgeInsets.only(left: 5, right: 5),
-              child: Text('Fade'),
+              child: Text("Fade (Don't Click The Animal)"),
             ))
       ],
     );
+  }
+}
+
+class AboutWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blue.shade100,
+      appBar: AppBar(
+        toolbarHeight: 45,
+        title: Text('About'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              child: Text('Developed by Corkine Ma',
+                  style: TextStyle(fontSize: 20)),
+            ),
+            pt10,
+            Hero(
+              tag: 'hero_animal',
+              child: Container(
+                  width: 100,
+                  padding: EdgeInsets.all(20),
+                  child: Image.asset('asserts/images/animal.png')),
+            ),
+            ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Return Last Route Page',
+                    style: TextStyle(fontSize: 15)))
+          ],
+        ),
+      )
+    );
+    ;
   }
 }

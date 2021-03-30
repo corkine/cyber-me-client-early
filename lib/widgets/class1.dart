@@ -108,3 +108,30 @@ class Class1AvatarWidget extends StatelessWidget {
     );
   }
 }
+
+BottomAppBar buildBottomAppBar(BuildContext context) {
+  return BottomAppBar(
+    color: Theme.of(context).primaryColor.withOpacity(0.8),
+    child: SizedBox(
+      height: 40,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Icon(
+            Icons.pause,
+            color: Colors.white,
+          ),
+          Icon(
+            Icons.stop,
+            color: Colors.white,
+          ),
+          Icon(
+            Icons.access_time,
+            color: Colors.white,
+          ),
+          Padding(padding: EdgeInsets.only(right: 30))
+        ],
+      ),
+    ),
+  );
+}
