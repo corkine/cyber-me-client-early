@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -6,6 +7,8 @@ import 'package:learn_flutter/widgets/class1.dart';
 import 'package:learn_flutter/widgets/class2.dart';
 import 'package:learn_flutter/widgets/class3.dart';
 import 'package:learn_flutter/widgets/class4.dart';
+import 'package:http/http.dart' as http;
+import 'package:learn_flutter/widgets/class5.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -19,7 +22,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   static const bodys = [
     const Class1Widget(),
     const Class2Widget(),
-    const Class3Widget()
+    const Class3Widget(),
+    const Class5Widget(),
   ];
   final btnDATA = [
     [Icons.directions_bike, 'Bike'],
@@ -44,6 +48,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     setState(() {
       tools = _response ?? '';
     });
+  }
+
+  _showQuickBar() {
+    return Text(
+      'Hello World Bottom PreferredSized Widget',
+      style: TextStyle(color: Colors.white),
+    );
   }
 
   final _split = Container(
@@ -138,12 +149,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       //width: MediaQuery.of(context).size.width,
                       width: double.infinity,
                       height: 30,
-                      child: Center(
-                        child: Text(
-                          'Hello World Bottom PreferredSized Widget',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                      child: Center(child: _showQuickBar()),
                     ),
                     preferredSize: Size.fromHeight(15),
                   )),
@@ -157,12 +163,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       .toList(),
                   controller: _tabController,
                 )
-              : SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: bodys[index],
-                  ),
-                ),
+              : (index < 3
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: bodys[index],
+                      ),
+                    )
+                  : Padding(
+                      padding: EdgeInsets.all(10),
+                      child: bodys[index],
+                    )),
         ),
         floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
         floatingActionButtonLocation: MediaQuery.of(context).size.width > 400
@@ -223,12 +234,25 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 onPressed: () => setState(() => index = 2),
                 child:
                     Text('Navigator', style: TextStyle(color: Colors.white))),
+            _split,
+            TextButton(
+                onPressed: () {
+                  setState(() {
+                    index = 3;
+                  });
+                },
+                child: Text('List', style: TextStyle(color: Colors.white)))
           ],
         ));
   }
 
   BottomNavigationBar buildBottomNavigationBar() {
     return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      fixedColor: Colors.blue,
+      unselectedItemColor: Colors.grey,
+      unselectedLabelStyle: TextStyle(color: Colors.grey),
+      showUnselectedLabels: true,
       onTap: (int ind) {
         setState(() => index = ind);
       },
@@ -239,8 +263,200 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         BottomNavigationBarItem(
             icon: Icon(Icons.apartment_rounded), label: 'Widget'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.repeat_rounded), label: 'Animation')
+            icon: Icon(Icons.repeat_rounded), label: 'Animation'),
+        BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'List'),
       ],
+    );
+  }
+}
+
+class Class5Widget extends StatefulWidget {
+  const Class5Widget({Key key}) : super(key: key);
+  @override
+  _Class5WidgetState createState() => _Class5WidgetState();
+}
+
+class _Class5WidgetState extends State<Class5Widget> {
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        Card(
+          child: buildContainer('Hello World'),
+          color: Colors.pinkAccent,
+        ),
+        Card(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(20),
+                  topRight: Radius.circular(20))),
+          child: buildContainer('Hello World'),
+          color: Colors.green,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        Card(
+          shape: StadiumBorder(),
+          child: buildContainer('Hello World'),
+          color: Colors.blue,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        Card(
+          shape: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.deepOrange)),
+          child: buildContainer('Hello World'),
+          color: Colors.blueGrey,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        Card(
+          shape:
+              OutlineInputBorder(borderSide: BorderSide(color: Colors.brown)),
+          child: buildContainer('Hello World'),
+          color: Colors.orangeAccent,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        pt10,
+        ListTile(
+          title: Text('Design'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.app_registration),
+          title: Text('Design'),
+          trailing: IconButton(
+            icon: Icon(Icons.bookmark_outline),
+            onPressed: () {},
+          ),
+          onTap: () {},
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+        ),
+        ListTile(
+          leading: Icon(Icons.app_registration),
+          title: Text('Design'),
+          subtitle: Text('Design The App'),
+          trailing: IconButton(
+            icon: Icon(Icons.bookmark),
+            onPressed: () {},
+          ),
+          onTap: () {},
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+        ),
+        ListTile(
+          leading: Icon(Icons.app_registration),
+          title: Text('Design'),
+          subtitle: Text('Design The App'),
+          trailing: IconButton(
+            icon: Icon(Icons.bookmark),
+            onPressed: () {},
+          ),
+          onTap: () {},
+          tileColor: Colors.purple.shade100,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/animal.png')),
+          title: Text('Show ListView.builder (http)'),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const Class5ListViewHttpDemo();
+            }));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/acorn.png')),
+          title: Text('Show GridView.count'),
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (c) => Class5GridViewHttpDemo()));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/ball.png')),
+          title: Text('Show Stack'),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (c) => Class5StackDemo()));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/ball.png')),
+          title: Text('Show Slivers'),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (c) => Class5SliverApp()));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/ball.png')),
+          title: Text('Show Real App layout'),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (c) => RealAppLayout()));
+          },
+        ),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            Chip(label: Text('HELLO')),
+            Chip(
+              label: Text('HELLO'),
+              labelStyle: TextStyle(
+                  fontSize: 15,
+                  color: Colors.red,
+                  decoration: TextDecoration.underline),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              avatar: CircleAvatar(
+                child: Text('H'),
+              ),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              labelPadding: EdgeInsets.all(10),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              deleteIcon: Icon(Icons.delete),
+              onDeleted: () {},
+            ),
+            ActionChip(label: Text('HELLO'), onPressed: (){}),
+            RawChip(label: Text('HELLO'),
+            showCheckmark: true,selected: true,
+            onPressed: (){},)
+          ],
+        )
+      ],
+    );
+  }
+
+  Container buildContainer(String content) {
+    return Container(
+      padding: EdgeInsets.only(left: 20),
+      alignment: AlignmentDirectional.centerStart,
+      height: 50,
+      width: double.infinity,
+      child: Text(
+        '$content',
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      ),
     );
   }
 }
