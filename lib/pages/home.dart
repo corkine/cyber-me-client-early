@@ -71,33 +71,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: Drawer(
-          child: ListView(children: [
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.fitWidth,
-                      alignment: Alignment.centerLeft,
-                      image: AssetImage('asserts/images/girl.jpg'))),
-              accountEmail: Text('corkine@outlook.com'),
-              accountName: Text('Corkine Ma'),
-              currentAccountPicture: Icon(Icons.face),
-              otherAccountsPictures: [Icon(Icons.bookmark)],
-            ),
-            ListTile(leading: Icon(Icons.adb_sharp),title: Text('Hello'), onTap: () {},),
-            ListTile(leading: Icon(Icons.adb_sharp),title: Text('Hello2'),onTap: () {},),
-            ListTile(leading: Icon(Icons.adb_sharp),title: Text('Hello3'),onTap: () {},),
-            ListTile(leading: Icon(Icons.adb_sharp),title: Text('Hello4'),onTap: () {},),
-            ListTile(leading: Icon(Icons.adb_sharp),title: Text('Hello5'),onTap: () {},),
-          ]),
-        ),
+        drawer: const Class4LeftDrawer(),
+        endDrawer: const Class4Drawer(),
         appBar: AppBar(
             leading: Builder(
-              builder: (c) => IconButton(
-                  icon: Icon(Icons.menu),
-                  onPressed: () {
-                    Scaffold.of(c).openDrawer();
-                  }),
+              builder: (c) => Tooltip(
+                message: 'width > 400 show endDrawer, < 400 show Drawer',
+                child: IconButton(
+                    icon: Icon(Icons.menu),
+                    onPressed: () {
+                      MediaQuery.of(context).size.width > 400
+                          ? Scaffold.of(c).openEndDrawer()
+                          : Scaffold.of(c).openDrawer();
+                    }),
+              ),
             ),
             title: Text('Home - $tools'),
             actions: [

@@ -72,3 +72,139 @@ class _GratitudeState extends State<Gratitude> {
     );
   }
 }
+
+
+class Class4LeftDrawer extends StatelessWidget {
+  const Class4LeftDrawer({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(children: [
+        UserAccountsDrawerHeader(
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.centerLeft,
+                  image: AssetImage('asserts/images/girl.jpg'))),
+          accountEmail: Text('corkine@outlook.com'),
+          accountName: Text('Corkine Ma'),
+          currentAccountPicture: Icon(Icons.face),
+          otherAccountsPictures: [Icon(Icons.bookmark)],
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello2'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello3'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello4'),
+          onTap: () {},
+        ),
+        Builder(
+          builder: (content) => ListTile(
+            leading: Icon(Icons.adb_sharp),
+            title: Text('Show End Drawer'),
+            onTap: () {
+              Scaffold.of(content).openEndDrawer();
+            },
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class Class4Drawer extends StatelessWidget {
+  const Class4Drawer({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(children: [
+        DrawerHeader(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10,bottom: 2),
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.white38,
+                  child: Text('C',style: TextStyle(fontSize: 27),),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Corkine',
+                      style: TextStyle(color: Colors.white, fontSize: 30)),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4,top: 2.4),
+                        child: Icon(Icons.email_outlined, color: Colors.white, size: 13,),
+                      ),
+                      Text(
+                        'corkine@outlook.com',
+                        style: TextStyle(color: Colors.white, fontSize: 13),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          decoration: BoxDecoration(color: Colors.blue),
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello2'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello3'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.adb_sharp),
+          title: Text('Hello4'),
+          onTap: () {},
+        ),
+        Builder(
+          builder: (content) => ListTile(
+            leading: Icon(Icons.adb_sharp),
+            title: Text('Show Drawer'),
+            onTap: () {
+              Scaffold.of(content).openDrawer();
+            },
+          ),
+        ),
+      ]),
+    );
+  }
+}
