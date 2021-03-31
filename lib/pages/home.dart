@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -7,7 +6,6 @@ import 'package:learn_flutter/widgets/class1.dart';
 import 'package:learn_flutter/widgets/class2.dart';
 import 'package:learn_flutter/widgets/class3.dart';
 import 'package:learn_flutter/widgets/class4.dart';
-import 'package:http/http.dart' as http;
 import 'package:learn_flutter/widgets/class5.dart';
 
 class Home extends StatefulWidget {
@@ -24,6 +22,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     const Class2Widget(),
     const Class3Widget(),
     const Class5Widget(),
+    const Class6Widget(),
   ];
   final btnDATA = [
     [Icons.directions_bike, 'Bike'],
@@ -241,7 +240,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     index = 3;
                   });
                 },
-                child: Text('List', style: TextStyle(color: Colors.white)))
+                child: Text('List', style: TextStyle(color: Colors.white))),
+            _split,
+            TextButton(
+                onPressed: () {
+                  setState(() {
+                    index = 4;
+                  });
+                },
+                child: Text('Gesture', style: TextStyle(color: Colors.white)))
           ],
         ));
   }
@@ -265,197 +272,187 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         BottomNavigationBarItem(
             icon: Icon(Icons.repeat_rounded), label: 'Animation'),
         BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'List'),
+        BottomNavigationBarItem(icon: Icon(Icons.gesture), label: 'Gesture'),
       ],
     );
   }
 }
 
-class Class5Widget extends StatefulWidget {
-  const Class5Widget({Key key}) : super(key: key);
+class Class6Widget extends StatefulWidget {
+  const Class6Widget({Key key}) : super(key: key);
   @override
-  _Class5WidgetState createState() => _Class5WidgetState();
+  _Class6WidgetState createState() => _Class6WidgetState();
 }
 
-class _Class5WidgetState extends State<Class5Widget> {
+class _Class6WidgetState extends State<Class6Widget> {
+  String _info = '';
+  Color _paintedColor;
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
       children: [
-        Card(
-          child: buildContainer('Hello World'),
-          color: Colors.pinkAccent,
-        ),
-        Card(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(20),
-                  topRight: Radius.circular(20))),
-          child: buildContainer('Hello World'),
-          color: Colors.green,
-          shadowColor: Colors.grey,
-          elevation: 4,
-        ),
-        Card(
-          shape: StadiumBorder(),
-          child: buildContainer('Hello World'),
-          color: Colors.blue,
-          shadowColor: Colors.grey,
-          elevation: 4,
-        ),
-        Card(
-          shape: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.deepOrange)),
-          child: buildContainer('Hello World'),
-          color: Colors.blueGrey,
-          shadowColor: Colors.grey,
-          elevation: 4,
-        ),
-        Card(
-          shape:
-              OutlineInputBorder(borderSide: BorderSide(color: Colors.brown)),
-          child: buildContainer('Hello World'),
-          color: Colors.orangeAccent,
-          shadowColor: Colors.grey,
-          elevation: 4,
-        ),
-        pt10,
-        ListTile(
-          title: Text('Design'),
-          onTap: () {},
-        ),
-        ListTile(
-          leading: Icon(Icons.app_registration),
-          title: Text('Design'),
-          trailing: IconButton(
-            icon: Icon(Icons.bookmark_outline),
-            onPressed: () {},
-          ),
-          onTap: () {},
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10))),
-        ),
-        ListTile(
-          leading: Icon(Icons.app_registration),
-          title: Text('Design'),
-          subtitle: Text('Design The App'),
-          trailing: IconButton(
-            icon: Icon(Icons.bookmark),
-            onPressed: () {},
-          ),
-          onTap: () {},
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10))),
-        ),
-        ListTile(
-          leading: Icon(Icons.app_registration),
-          title: Text('Design'),
-          subtitle: Text('Design The App'),
-          trailing: IconButton(
-            icon: Icon(Icons.bookmark),
-            onPressed: () {},
-          ),
-          onTap: () {},
-          tileColor: Colors.purple.shade100,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10))),
-        ),
-        ListTile(
-          leading: SizedBox(
-              height: 30, child: Image.asset('asserts/images/animal.png')),
-          title: Text('Show ListView.builder (http)'),
+        GestureDetector(
           onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return const Class5ListViewHttpDemo();
-            }));
+            print('Taped');
+            setState(() => _info = 'Tapped');
           },
-        ),
-        ListTile(
-          leading: SizedBox(
-              height: 30, child: Image.asset('asserts/images/acorn.png')),
-          title: Text('Show GridView.count'),
-          onTap: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (c) => Class5GridViewHttpDemo()));
+          onDoubleTap: () {
+            print('Double Taped');
+            setState(() => _info = 'Double Taped');
           },
-        ),
-        ListTile(
-          leading: SizedBox(
-              height: 30, child: Image.asset('asserts/images/ball.png')),
-          title: Text('Show Stack'),
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (c) => Class5StackDemo()));
+          onLongPress: () {
+            print('Long Pressed');
+            setState(() => _info = 'Long Pressed');
           },
-        ),
-        ListTile(
-          leading: SizedBox(
-              height: 30, child: Image.asset('asserts/images/ball.png')),
-          title: Text('Show Slivers'),
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (c) => Class5SliverApp()));
+          onPanUpdate: (details) {
+            print('PanUpdated');
+            setState(() => _info = 'Pan Updated $details');
           },
-        ),
-        ListTile(
-          leading: SizedBox(
-              height: 30, child: Image.asset('asserts/images/ball.png')),
-          title: Text('Show Real App layout'),
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (c) => RealAppLayout()));
-          },
-        ),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            Chip(label: Text('HELLO')),
-            Chip(
-              label: Text('HELLO'),
-              labelStyle: TextStyle(
-                  fontSize: 15,
-                  color: Colors.red,
-                  decoration: TextDecoration.underline),
+          child: Container(
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.alarm,
+              size: 100,
+              color: Colors.blueGrey,
             ),
-            Chip(
-              label: Text('HELLO'),
-              avatar: CircleAvatar(
-                child: Text('H'),
+          ),
+        ),
+        Text('$_info'),
+        Divider(),
+        Draggable(
+            onDragStarted: () => setState(() => _paintedColor = Colors.black),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.palette,
+                  color: Colors.deepOrange,
+                  size: 48,
+                ),
+                Text('Drag Me below to change color')
+              ],
+            ),
+            childWhenDragging: Icon(
+              Icons.palette,
+              color: Colors.grey,
+              size: 48,
+            ),
+            feedback: FractionalTranslation(
+              translation: Offset(0.9, -0.4),
+              child: Icon(
+                Icons.brush,
+                color: Colors.deepOrange,
+                size: 80,
               ),
             ),
-            Chip(
-              label: Text('HELLO'),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-            ),
-            Chip(
-              label: Text('HELLO'),
-              labelPadding: EdgeInsets.all(10),
-            ),
-            Chip(
-              label: Text('HELLO'),
-              deleteIcon: Icon(Icons.delete),
-              onDeleted: () {},
-            ),
-            ActionChip(label: Text('HELLO'), onPressed: (){}),
-            RawChip(label: Text('HELLO'),
-            showCheckmark: true,selected: true,
-            onPressed: (){},)
-          ],
-        )
+            data: Colors.deepOrange.value),
+        Divider(),
+        DragTarget<int>(
+          onAccept: (data) => _paintedColor = Color(data),
+          builder: (c, acceptedData, rejectedData) => acceptedData.isEmpty
+              ? Text(
+                  'Drag To and See color change',
+                  style: TextStyle(color: _paintedColor),
+                )
+              : Text(
+                  'Painting Color $acceptedData',
+                  style: TextStyle(
+                      color: Color(acceptedData[0]),
+                      fontWeight: FontWeight.bold),
+                ),
+        ),
+        Divider(),
+        pt10,
+        ElevatedButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (c) => ScaleRouteDemo()));
+            },
+            child: Text('Show Scale and Rotate Demo'))
       ],
     );
   }
+}
 
-  Container buildContainer(String content) {
-    return Container(
-      padding: EdgeInsets.only(left: 20),
-      alignment: AlignmentDirectional.centerStart,
-      height: 50,
-      width: double.infinity,
-      child: Text(
-        '$content',
-        style: TextStyle(color: Colors.white, fontSize: 20),
+class ScaleRouteDemo extends StatefulWidget {
+  const ScaleRouteDemo({Key key}) : super(key: key);
+  @override
+  _ScaleRouteDemoState createState() => _ScaleRouteDemoState();
+}
+
+class _ScaleRouteDemoState extends State<ScaleRouteDemo> {
+  double _currentScale = 2.0;
+  Offset _currentOffset = Offset(0, 0);
+  Offset _startLastOffset;
+  Offset _lastOffset;
+  double _lastScale;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Demo'),
+      ),
+      body: GestureDetector(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Transform(
+              transform: Matrix4.identity()
+                ..scale(_currentScale, _currentScale)
+                ..translate(_currentOffset.dx, _currentOffset.dy),
+              alignment: FractionalOffset.center,
+              child: Image.asset('asserts/images/girl.jpg'),
+            ),
+            Positioned(
+              top: 0.0,
+              width: MediaQuery.of(context).size.width,
+              child: Container(
+                color: Colors.white54,
+                height: 50,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text('Scale: ${_currentScale.toStringAsFixed(4)}'),
+                    Text('Current: $_currentOffset')
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+        onScaleStart: (details) {
+          _startLastOffset = details.focalPoint;
+          _lastOffset = _currentOffset;
+          _lastScale = _currentScale;
+        },
+        onScaleUpdate: (details) {
+          if (details.scale != 1.0) { //当进行了缩放，设置当前的缩放级别
+            double currentScale = _lastScale * details.scale;
+            if (currentScale < 0.5) currentScale = 0.5; //如果过小则使用安全值
+            setState(() => _currentScale = currentScale); //更新缩放值并刷新页面
+          } else if (details.scale == 1.0) { //如果没有进行缩放，那么就进行了平移
+            //计算相对于刚开始移动时的每缩放偏移，然后计算出当前位置在当前缩放下偏移应该移动的数目，将其更新
+            Offset offsetAdjustedForScale = (_startLastOffset - _lastOffset) / _lastScale;
+            Offset currentOffset = details.focalPoint - (offsetAdjustedForScale * _currentScale);
+            setState(() => _currentOffset = currentOffset);
+          }
+        },
+        onDoubleTap: () {
+          setState(() => _currentScale >= 4
+              ? _currentScale = 1.0
+              : _currentScale = _currentScale * 2);
+        },
+        onLongPress: () {
+          setState(() {
+            _startLastOffset = Offset.zero;
+            _lastOffset = Offset.zero;
+            _currentOffset = Offset.zero;
+            _currentScale = 1.0;
+            _lastScale = 1.0;
+          });
+        },
       ),
     );
   }

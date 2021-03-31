@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:learn_flutter/utils/padding.dart';
 
 class Class5ListViewHttpDemo extends StatefulWidget {
   const Class5ListViewHttpDemo({Key key}) : super(key: key);
@@ -70,7 +71,7 @@ class _Class5GridViewHttpDemoState extends State<Class5GridViewHttpDemo> {
                     decoration: BoxDecoration(
                         image: DecorationImage(
                             image: s.data[i]['picture'] != null
-                                ? NetworkImage(s.data[i]['picture'])
+                                ? NetworkImage(s.data[i]['picture'].toString().replaceFirst('http://', 'https://'))
                                 : AssetImage(
                                 'asserts/images/acorn.png'),
                             fit: BoxFit.cover)),
@@ -254,7 +255,7 @@ class _RealAppLayoutState extends State<RealAppLayout> {
               decoration: BoxDecoration(
                   image: DecorationImage(
                       image: NetworkImage(
-                          'http://static2.mazhangjing.com/20210331/'
+                          'https://static2.mazhangjing.com/20210331/'
                               'bca5523_3651580255_1796619115.jpg'),
                       fit: BoxFit.cover,
                       alignment: Alignment(0, 0.05))),
@@ -329,21 +330,21 @@ class _RealAppLayoutState extends State<RealAppLayout> {
                       children: [
                         CircleAvatar(
                           backgroundImage: NetworkImage(
-                              'http://static2.mazhangjing.com/20210331/'
+                              'https://static2.mazhangjing.com/20210331/'
                                   'a1d368f_adaf2edda3cc7cd9a63a7d1d9fac0d39b90e9116.jpeg'),
                           radius: 40,
                         ),
                         Padding(padding: EdgeInsets.all(10)),
                         CircleAvatar(
                           backgroundImage: NetworkImage(
-                              'http://static2.mazhangjing.com/20210331/5fcbd46_src=http___pic.'
+                              'https://static2.mazhangjing.com/20210331/5fcbd46_src=http___pic.'
                                   '3490.cn_edit_2017_07-10_20170710102053125312.jpg&refer=http___pic.3490.jfif'),
                           radius: 40,
                         ),
                         Padding(padding: EdgeInsets.all(10)),
                         CircleAvatar(
                           backgroundImage: NetworkImage(
-                              'http://static2.mazhangjing.com/20210331/64d346c_src=http___www.jonkoonce.com_editor_attached_image_'
+                              'https://static2.mazhangjing.com/20210331/64d346c_src=http___www.jonkoonce.com_editor_attached_image_'
                                   '20150127_20150127085175897589.jpg&refer=http___www.jonkoonce.jfif'),
                           radius: 40,
                         )
@@ -422,3 +423,195 @@ class LabelWidget extends StatelessWidget {
     return f;
   }
 }
+
+class Class5Widget extends StatefulWidget {
+  const Class5Widget({Key key}) : super(key: key);
+  @override
+  _Class5WidgetState createState() => _Class5WidgetState();
+}
+
+class _Class5WidgetState extends State<Class5Widget> {
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        Card(
+          child: buildContainer('Hello World'),
+          color: Colors.pinkAccent,
+        ),
+        Card(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(20),
+                  topRight: Radius.circular(20))),
+          child: buildContainer('Hello World'),
+          color: Colors.green,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        Card(
+          shape: StadiumBorder(),
+          child: buildContainer('Hello World'),
+          color: Colors.blue,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        Card(
+          shape: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.deepOrange)),
+          child: buildContainer('Hello World'),
+          color: Colors.blueGrey,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        Card(
+          shape:
+          OutlineInputBorder(borderSide: BorderSide(color: Colors.brown)),
+          child: buildContainer('Hello World'),
+          color: Colors.orangeAccent,
+          shadowColor: Colors.grey,
+          elevation: 4,
+        ),
+        pt10,
+        ListTile(
+          title: Text('Design'),
+          onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.app_registration),
+          title: Text('Design'),
+          trailing: IconButton(
+            icon: Icon(Icons.bookmark_outline),
+            onPressed: () {},
+          ),
+          onTap: () {},
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+        ),
+        ListTile(
+          leading: Icon(Icons.app_registration),
+          title: Text('Design'),
+          subtitle: Text('Design The App'),
+          trailing: IconButton(
+            icon: Icon(Icons.bookmark),
+            onPressed: () {},
+          ),
+          onTap: () {},
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+        ),
+        ListTile(
+          leading: Icon(Icons.app_registration),
+          title: Text('Design'),
+          subtitle: Text('Design The App'),
+          trailing: IconButton(
+            icon: Icon(Icons.bookmark),
+            onPressed: () {},
+          ),
+          onTap: () {},
+          tileColor: Colors.purple.shade100,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/animal.png')),
+          title: Text('Show ListView.builder (http)'),
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return const Class5ListViewHttpDemo();
+            }));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/acorn.png')),
+          title: Text('Show GridView.count'),
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (c) => Class5GridViewHttpDemo()));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/ball.png')),
+          title: Text('Show Stack'),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (c) => Class5StackDemo()));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/ball.png')),
+          title: Text('Show Slivers'),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (c) => Class5SliverApp()));
+          },
+        ),
+        ListTile(
+          leading: SizedBox(
+              height: 30, child: Image.asset('asserts/images/ball.png')),
+          title: Text('Show Real App layout'),
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (c) => RealAppLayout()));
+          },
+        ),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            Chip(label: Text('HELLO')),
+            Chip(
+              label: Text('HELLO'),
+              labelStyle: TextStyle(
+                  fontSize: 15,
+                  color: Colors.red,
+                  decoration: TextDecoration.underline),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              avatar: CircleAvatar(
+                child: Text('H'),
+              ),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              labelPadding: EdgeInsets.all(10),
+            ),
+            Chip(
+              label: Text('HELLO'),
+              deleteIcon: Icon(Icons.delete),
+              onDeleted: () {},
+            ),
+            ActionChip(label: Text('HELLO'), onPressed: (){}),
+            RawChip(label: Text('HELLO'),
+              showCheckmark: true,selected: true,
+              onPressed: (){},)
+          ],
+        )
+      ],
+    );
+  }
+
+  Container buildContainer(String content) {
+    return Container(
+      padding: EdgeInsets.only(left: 20),
+      alignment: AlignmentDirectional.centerStart,
+      height: 50,
+      width: double.infinity,
+      child: Text(
+        '$content',
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      ),
+    );
+  }
+}
+
