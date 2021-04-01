@@ -1,16 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:learn_flutter/pages/home.dart';
+import 'package:learn_flutter/pages/cmgo.dart';
+import 'package:learn_flutter/store.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter 101',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: Home(),
-    );
-  }
+//MyAndroidApp, MyIOSApp,
+void main() {
+  //runApp(MyIOSApp());
+  runStore();
 }
