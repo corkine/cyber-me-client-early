@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:learn_flutter/pages/cmgo.dart';
 import 'package:learn_flutter/store.dart';
 import 'package:learn_flutter/widgets/animation.dart';
+import 'package:learn_flutter/widgets/cmgo.dart';
 
 //MyAndroidApp, MyIOSApp,
 void main() {
   //runApp(MyIOSApp());
-  AnimationDemo.runAnimation();
+  //AnimationDemo.runAnimation();
+  CMGO.run();
 }
