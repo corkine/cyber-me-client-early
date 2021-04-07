@@ -41,5 +41,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>需要访问相机以拍摄照片。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问照片图库以加载图片。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>需要访问麦克风以录制视频。</string>
 </dict>
 </plist>

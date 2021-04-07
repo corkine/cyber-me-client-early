@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:learn_flutter/cmgo/data.dart';
+import 'package:learn_flutter/cmpocket/data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:collection';
 import 'dart:convert';
 import 'package:provider/provider.dart';
-import 'package:learn_flutter/cmgo/config.dart';
+import 'package:learn_flutter/cmpocket/config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class QuickLinkPage extends StatefulWidget {
@@ -25,10 +25,7 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
   }
 
   Future<List<EntityLog>> fetchData(int limit) async {
-    return http
-        .get(Uri.parse(
-            'https://go.mazhangjing.com/logs?user=corkine&password=mzj960032&day=$limit'))
-        .then((value) {
+    return http.get(Uri.parse(Config.dataURL(limit))).then((value) {
       var data = jsonDecode(Utf8Codec().decode(value.bodyBytes));
       return (data as List).map((e) => EntityLog.fromJSON(e)).toList();
     });
@@ -37,6 +34,19 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
   _retry(int limit) => setState(() {
         _data = fetchData(limit);
       });
+
+  Map<String, List<EntityLog>> _count(List<EntityLog> logs) {
+    logs.sort((a, b) => -1 * a.actionTime.compareTo(b.actionTime));
+    final Map<String, List<EntityLog>> result = {};
+    logs.forEach((element) {
+      if (result.containsKey(element.keyword)) {
+        result[element.keyword].add(element);
+      } else {
+        result[element.keyword] = [element];
+      }
+    });
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,44 +61,52 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
               if (s.hasError) //如果出错，state 重置，但是 data 不会重置
                 return InkWell(
                     radius: 20,
-                    onTap: _retry(config.shortURLShowLimit),
+                    onTap: () => _retry(config.shortURLShowLimit),
                     child: Center(child: Text('检索出错，点击重试')));
               if (s.hasData) {
-                List<EntityLog> logs;
-                if (config.filterDuplicate)
-                  logs = HashMap<String, EntityLog>.fromIterable(
-                      (s.data as List).reversed,
-                      key: (e) => (e as EntityLog).keyword,
-                      value: (e) => e).values.toList();
-                else
-                  logs = s.data;
-                logs.sort((a, b) => -1 * a.actionTime.compareTo(b.actionTime));
+                Map<String, List<EntityLog>> map = _count(s.data);
+                List<EntityLog> logs = map.values.map((e) => e[0]).toList();
                 return ListView.builder(
                     itemCount: logs.length,
                     itemBuilder: (c, i) => ListTile(
-                        onTap: () => launch(logs[i].url),
-                        leading: Padding(
-                          padding: const EdgeInsets.only(top: 5, right: 8),
-                          child: Icon(Icons.vpn_lock),
-                        ),
-                        horizontalTitleGap: 0,
-                        title: RichText(
-                            text: TextSpan(
-                                text: logs[i].keyword,
-                                style: TextStyle(color: Colors.black),
-                                children: [
-                              TextSpan(
-                                  text: '  ' +
-                                      DateFormat('yy/M/d HH:mm')
-                                          .format(logs[i].actionTime),
+                          onTap: () => launch(logs[i].url),
+                          leading: Padding(
+                            padding: const EdgeInsets.only(top: 5, right: 9),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.blueGrey.shade200,
+                              foregroundColor: Colors.white,
+                              child: Text(logs[i]
+                                  .keyword
+                                  .substring(0, 1)
+                                  .toUpperCase()),
+                            ),
+                          ),
+                          horizontalTitleGap: 0,
+                          title: RichText(
+                              text: TextSpan(
+                                  text: logs[i].keyword,
                                   style: TextStyle(
-                                      color: Colors.grey, fontSize: 12))
-                            ])),
-                        subtitle: Text(
-                          logs[i].iPInfo,
-                          style: TextStyle(
-                              color: Colors.grey.shade700, fontSize: 13),
-                        )));
+                                      color: Colors.black, fontSize: 18),
+                                  children: [
+                                TextSpan(
+                                    text: '  ' +
+                                        DateFormat('yy/M/d HH:mm')
+                                            .format(logs[i].actionTime),
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 12))
+                              ])),
+                          subtitle: Text(
+                            logs[i].iPInfo,
+                            style: TextStyle(
+                                color: Colors.grey.shade700, fontSize: 13),
+                          ),
+                          trailing: config.filterDuplicate
+                              ? Chip(
+                                  backgroundColor: Colors.grey.shade200,
+                                  label: Text(
+                                      map[logs[i].keyword].length.toString()))
+                              : null,
+                        ));
               }
               return Center(
                 child: Text('没有数据'),
@@ -120,7 +138,7 @@ class _SearchPageState extends State<SearchPage> {
         return Scaffold(
           appBar: AppBar(
             title: Text('Keyword'),
-            toolbarHeight: config.toolBarHeight,
+            toolbarHeight: Config.toolBarHeight,
           ),
           body: Container(
             color: Colors.transparent,
@@ -185,14 +203,14 @@ class ItemSearchDelegate extends SearchDelegate<String> {
                 children: [
                   TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                      child: Text('删除', style: TextStyle(color: Colors.red))),
-                  TextButton(
-                      onPressed: () {
                         Navigator.of(context).pop(false);
                       },
-                      child: Text('取消'))
+                      child: Text('取消')),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: Text('删除', style: TextStyle(color: Colors.red)))
                 ],
               )
             ],
@@ -203,8 +221,7 @@ class ItemSearchDelegate extends SearchDelegate<String> {
   _deleteFromWeb(BuildContext context, String query) {
     if (query == null || query.isEmpty) return;
     http
-        .get(Uri.parse(
-            'https://go.mazhangjing.com/deleteKey/$query?user=corkine&password=mzj960032'))
+        .get(Uri.parse(Config.deleteURL(query)))
         .then((value) => jsonDecode(Utf8Codec().decode(value.bodyBytes)))
         .then((value) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -249,13 +266,10 @@ class _SearchResultState extends State<SearchResult> {
   }
 
   Future<List<Entity>> _loadData() {
-    return http
-        .get(Uri.parse('https://go.mazhangjing.com/searchjson/${_word()}'
-            '?user=corkine&password=mzj960032'))
-        .then((value) =>
-            (jsonDecode(Utf8Codec().decode(value.bodyBytes)) as List)
-                .map((e) => Entity.fromJSON(e))
-                .toList());
+    return http.get(Uri.parse(Config.searchURL(_word()))).then((value) =>
+        (jsonDecode(Utf8Codec().decode(value.bodyBytes)) as List)
+            .map((e) => Entity.fromJSON(e))
+            .toList());
   }
 
   @override
@@ -370,7 +384,7 @@ class _SearchResultState extends State<SearchResult> {
                           if (value) {
                             http
                                 .get(Uri.parse(
-                                    'https://go.mazhangjing.com/deleteKey/${data[i].keyword}?user=corkine&password=mzj960032'))
+                                    Config.deleteURL(data[i].keyword)))
                                 .then((value) => jsonDecode(
                                     Utf8Codec().decode(value.bodyBytes)))
                                 .then((value) {
@@ -425,7 +439,7 @@ class _AddDialogState extends State<AddDialog> {
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 0),
         child: Text(
-          '将原始地址跳转到 https://go.mazhangjing.com/${widget.query}',
+          '将原始地址跳转到 ${Config.basicURL}/${widget.query}',
           style: TextStyle(fontSize: 12),
         ),
       ),
@@ -440,12 +454,12 @@ class _AddDialogState extends State<AddDialog> {
       ),
       ButtonBar(
         children: [
-          TextButton(onPressed: _submitData, child: Text('确定')),
           TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('取消'))
+              child: Text('取消')),
+          TextButton(onPressed: _submitData, child: Text('确定')),
         ],
       )
     ]);
@@ -460,11 +474,10 @@ class _AddDialogState extends State<AddDialog> {
           .showSnackBar(SnackBar(content: Text('没有数据')));
     } else
       http
-          .post(Uri.parse('https://go.mazhangjing.com/add'),
+          .post(Uri.parse(Config.addURL),
               headers: {
                 "content-type": "application/json",
-                HttpHeaders.authorizationHeader:
-                    "Basic ${base64Encode(utf8.encode('corkine:mzj960032'))}"
+                HttpHeaders.authorizationHeader: Config.base64Token
               },
               body: utf8.encode(json.encode({
                 'keyword': keywords,

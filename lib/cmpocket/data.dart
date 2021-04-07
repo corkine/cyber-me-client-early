@@ -50,3 +50,51 @@ class Entity {
       return null;
   }
 }
+
+class Good {
+  String id;
+  String name;
+  String description;
+  String currentState;
+  String importance;
+  String place;
+  String message;
+  String picture;
+  DateTime addTime;
+  DateTime updateTime;
+  Good.fromJSON(Map<String, dynamic> map)
+      : id = map['id'],
+        name = map['name'],
+        description = map['description'],
+        currentState = _handleState(map),
+        importance = map['importance'],
+        place = map['place'],
+        picture = _handlePicture(map),
+        message = map['message'],
+        addTime = DateTime.parse(map['addTime']),
+        updateTime = DateTime.parse(map['updateTime']);
+  static _handlePicture(Map<String, dynamic> map) {
+    final res = map['picture'].toString().replaceFirst('http://', 'https://');
+    if (res == null || res.isEmpty || res.trim() == 'null')
+      return null;
+    else
+      return res;
+  }
+
+  static _handleState(Map<String, dynamic> map) {
+    final res = map['currentState'].toString();
+    if (res == null || res.isEmpty || res.trim() == 'null') return null;
+    switch (res.toUpperCase()) {
+      case 'ACTIVE':
+        return '活跃';
+      case 'ARCHIVE':
+        return '收纳';
+      case 'ORDINARY':
+        return '普通';
+      case 'BORROW':
+        return '外借';
+      default:
+        return res;
+    }
+  }
+}
