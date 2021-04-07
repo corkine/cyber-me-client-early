@@ -196,8 +196,8 @@ class GoodList extends StatelessWidget {
             ));
   }
 
-  Future<bool> _handleDismiss(
-      DismissDirection direction, Good good, BuildContext context) async {
+  Future<bool> _handleDismiss(DismissDirection direction,
+      Good good, BuildContext context) async {
     if (direction == DismissDirection.startToEnd) return false;
     return showDialog(
         barrierDismissible: false,
@@ -285,8 +285,7 @@ class _GoodAddState extends State<GoodAdd> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
-            controller: TextEditingController(
-                text: good == null ? '' : good.id.replaceFirst('CM', '')),
+            initialValue: good == null ? '' : good.id.replaceFirst('CM', ''),
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '编号*',
@@ -300,8 +299,7 @@ class _GoodAddState extends State<GoodAdd> {
           ),
           SizedBox(height: 7),
           TextFormField(
-            controller:
-                TextEditingController(text: good == null ? '' : good.name),
+            initialValue: good == null ? '' : good.name,
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '名称*',
@@ -312,8 +310,7 @@ class _GoodAddState extends State<GoodAdd> {
           ),
           SizedBox(height: 7),
           TextFormField(
-            controller: TextEditingController(
-                text: good == null ? '' : good.description ?? ''),
+            initialValue: good == null ? '' : good.description ?? '',
             autocorrect: false,
             decoration: InputDecoration(labelText: '描述'),
             onSaved: (d) => d != null && d.isNotEmpty
@@ -392,8 +389,7 @@ class _GoodAddState extends State<GoodAdd> {
               ]),
           SizedBox(height: 7),
           TextFormField(
-            controller: TextEditingController(
-                text: good == null ? '' : good.place ?? ''),
+            initialValue: good == null ? '' : good.place ?? '',
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '位置',
@@ -404,8 +400,7 @@ class _GoodAddState extends State<GoodAdd> {
           ),
           SizedBox(height: 7),
           TextFormField(
-            controller: TextEditingController(
-                text: good == null ? '' : good.message ?? ''),
+            initialValue: good == null ? '' : good.message ?? '',
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '消息',
@@ -543,6 +538,8 @@ class _GoodAddState extends State<GoodAdd> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(result['message'])));
         Navigator.of(context).pop();
+        final model = Provider.of<Config>(context,listen: false);
+        model.justNotify();
         failed = false;
         return result;
       } finally {

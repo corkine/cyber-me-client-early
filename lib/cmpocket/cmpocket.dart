@@ -41,8 +41,9 @@ class _PocketHomeState extends State<PocketHome> {
         return RichText(
             text: TextSpan(text: '物品管理', style: Config.headerStyle, children: [
           TextSpan(
-              text: ' (${config.notShowClothes ? '不' : ''}显示衣物, '
-                  '${config.notShowRemoved ? '不' : ''}显示删除)',
+              text: ' ('
+                  '${config.notShowRemoved ? '不' : ''}显示删除, '
+                  '${config.notShowArchive ? '不' : ''}显示收纳)',
               style: Config.smallHeaderStyle)
         ]));
       case 2:
