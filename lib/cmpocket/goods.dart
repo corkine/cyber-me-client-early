@@ -104,20 +104,25 @@ class GoodList extends StatelessWidget {
                       color: goods[i].picture != null ? null : Colors.blueGrey,
                       decoration: goods[i].picture != null
                           ? BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(goods[i].picture),
-                            fit: BoxFit.fitWidth,
-                            colorFilter: ColorFilter.mode(
-                                Colors.white12, BlendMode.color),
-                            alignment: Alignment(0, -0.5),
-                          ))
+                              image: DecorationImage(
+                              image: NetworkImage(goods[i].picture),
+                              fit: BoxFit.fitWidth,
+                              colorFilter: ColorFilter.mode(
+                                  Colors.white12, BlendMode.color),
+                              alignment: Alignment(0, -0.5),
+                            ))
                           : null,
                       width: double.infinity,
                       height: 100,
                     ),
                   ),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return GoodAdd(goods[i]);
+                      }));
+                    },
                     child: Container(
                       alignment: Alignment.center,
                       width: double.infinity,
@@ -140,13 +145,13 @@ class GoodList extends StatelessWidget {
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 18),
                                 children: [
-                                  TextSpan(
-                                      text: '  ' +
-                                          DateFormat('yy/M/d')
-                                              .format(goods[i].updateTime),
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 12))
-                                ])),
+                              TextSpan(
+                                  text: '  ' +
+                                      DateFormat('yy/M/d')
+                                          .format(goods[i].updateTime),
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 12))
+                            ])),
                         subtitle: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,6 +235,8 @@ class GoodList extends StatelessWidget {
 }
 
 class GoodAdd extends StatefulWidget {
+  final Good good;
+  const GoodAdd(this.good);
   @override
   _GoodAddState createState() => _GoodAddState();
 }
@@ -248,9 +255,10 @@ class _GoodAddState extends State<GoodAdd> {
 
   @override
   Widget build(BuildContext context) {
+    final good = widget.good;
     return Scaffold(
       appBar: AppBar(
-        title: Text('添加物品'),
+        title: Text(good == null ? '添加物品' : '修改物品'),
         toolbarHeight: Config.toolBarHeight,
       ),
       body: SingleChildScrollView(
@@ -263,12 +271,15 @@ class _GoodAddState extends State<GoodAdd> {
   }
 
   Form buildForm(BuildContext context) {
+    final good = widget.good;
     return Form(
       key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
+            controller: TextEditingController(
+                text: good == null ? '' : good.id.replaceFirst('CM', '')),
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '编号*',
@@ -276,10 +287,14 @@ class _GoodAddState extends State<GoodAdd> {
                 prefixText: 'CM',
                 helperStyle: Config.formHelperStyle),
             validator: (v) => (v.isNotEmpty) ? null : '编号必须以 CM 开头，不可为空',
-            onSaved: (d) => request.fields['goodId'] = 'CM' + d.toUpperCase(),
+            onSaved: (d) =>
+                request.fields[good == null ? 'goodId' : 'newGoodId'] =
+                    'CM' + d.toUpperCase(),
           ),
           SizedBox(height: 7),
           TextFormField(
+            controller:
+                TextEditingController(text: good == null ? '' : good.name),
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '名称*',
@@ -290,6 +305,8 @@ class _GoodAddState extends State<GoodAdd> {
           ),
           SizedBox(height: 7),
           TextFormField(
+            controller: TextEditingController(
+                text: good == null ? '' : good.description ?? ''),
             autocorrect: false,
             decoration: InputDecoration(labelText: '描述'),
             onSaved: (d) => d != null && d.isNotEmpty
@@ -299,7 +316,7 @@ class _GoodAddState extends State<GoodAdd> {
           SizedBox(height: 17),
           DropdownButtonFormField<String>(
               decoration: InputDecoration(labelText: '状态*'),
-              value: 'Active',
+              value: good == null ? 'Active' : good.currentStateEn ?? 'Active',
               onChanged: (e) {},
               hint: Text('选择物品所处状态'),
               onSaved: (d) => d != null && d.isNotEmpty
@@ -338,7 +355,7 @@ class _GoodAddState extends State<GoodAdd> {
           SizedBox(height: 7),
           DropdownButtonFormField<String>(
               decoration: InputDecoration(labelText: '级别*'),
-              value: 'A',
+              value: good == null ? 'A' : good.importance ?? 'A',
               onChanged: (e) {},
               onSaved: (d) => d != null && d.isNotEmpty
                   ? request.fields['importance'] = d
@@ -368,6 +385,8 @@ class _GoodAddState extends State<GoodAdd> {
               ]),
           SizedBox(height: 7),
           TextFormField(
+            controller: TextEditingController(
+                text: good == null ? '' : good.place ?? ''),
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '位置',
@@ -378,6 +397,8 @@ class _GoodAddState extends State<GoodAdd> {
           ),
           SizedBox(height: 7),
           TextFormField(
+            controller: TextEditingController(
+                text: good == null ? '' : good.message ?? ''),
             autocorrect: false,
             decoration: InputDecoration(
                 labelText: '消息',
@@ -399,20 +420,40 @@ class _GoodAddState extends State<GoodAdd> {
                     onPressed: _handleFetch,
                     child: Row(
                       children: [
-                        Icon(_image == null
-                            ? Icons.photo_camera
-                            : Icons.remove_circle_outline),
+                        Icon(good == null
+                            ? _image == null
+                                ? Icons.photo_camera
+                                : Icons.remove_circle_outline
+                            : Icons.photo_camera),
                         SizedBox(width: 6),
-                        Text(_image == null ? '拍摄物品照片' : '删除所选照片')
+                        Text(good == null
+                            ? _image == null
+                                ? '拍摄物品照片'
+                                : '删除所选照片'
+                            : good.picture == null
+                                ? '补充添加照片'
+                                : '更新所选照片')
                       ],
                     ),
                   )),
-              _image != null
-                  ? Image.file(_image, width: 100)
-                  : SizedBox(
-                      height: 1,
-                      width: 1,
-                    ),
+              good == null
+                  ? _image != null
+                      ? Image.file(_image, width: 100)
+                      : SizedBox(
+                          height: 1,
+                          width: 1,
+                        )
+                  : good.picture == null
+                      ? _image == null
+                          ? SizedBox(
+                              height: 1,
+                              width: 1,
+                            )
+                          : Image.file(
+                              _image,
+                              width: 100,
+                            )
+                      : Image.network(good.picture, width: 100),
             ],
           ),
           ButtonBar(
@@ -421,8 +462,10 @@ class _GoodAddState extends State<GoodAdd> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('返回 / 取消')),
-              ElevatedButton(onPressed: _savingData, child: Text('提交')),
+                  child: Text('返回/取消')),
+              ElevatedButton(
+                  onPressed: _savingData,
+                  child: Text(good == null ? '创建' : '更新')),
             ],
           )
         ],
@@ -431,7 +474,11 @@ class _GoodAddState extends State<GoodAdd> {
   }
 
   _resetRequest() {
-    request = http.MultipartRequest('POST', Uri.parse(Config.goodsAddURL));
+    request = http.MultipartRequest(
+        'POST',
+        Uri.parse(widget.good == null
+            ? Config.goodsAddURL
+            : Config.goodsUpdateURL(widget.good.id)));
     request.fields.clear();
   }
 
@@ -476,6 +523,7 @@ class _GoodAddState extends State<GoodAdd> {
         formKey.currentState.save();
         print(request.fields);
         if (_image != null) {
+          //新建，有新图片 或者 修改，更新图片。当新建时没有添加图片，或者修改图片未更改，则不做处理。
           final file =
               await http.MultipartFile.fromPath('picture', _image.path);
           request.files.add(file);
@@ -487,6 +535,7 @@ class _GoodAddState extends State<GoodAdd> {
         Map<String, dynamic> result = jsonDecode(utf8.decode(data));
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(result['message'])));
+        Navigator.of(context).pop();
         failed = false;
         return result;
       } finally {

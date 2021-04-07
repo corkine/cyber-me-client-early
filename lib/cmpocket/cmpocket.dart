@@ -13,7 +13,7 @@ class CMPocket {
       },
       child: MaterialApp(
         title: 'CMPocket',
-        debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: true,
         home: PocketHome(),
       ),
     ));
@@ -26,7 +26,7 @@ class PocketHome extends StatefulWidget {
 }
 
 class _PocketHomeState extends State<PocketHome> {
-  int _index = 1;
+  int _index = Config.pageIndex;
   Widget _title(Config config) {
     switch (_index) {
       case 0:
@@ -130,7 +130,7 @@ class _PocketHomeState extends State<PocketHome> {
         break;
       case 1:
         Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
-          return GoodAdd();
+          return const GoodAdd(null);
         }));
         break;
       default:
@@ -183,7 +183,7 @@ class _PocketHomeState extends State<PocketHome> {
                       ListTile(
                         leading: Icon(Icons.all_inclusive_sharp),
                         title: Text('博客'),
-                        onTap: () { launch('https://blog.mazhangjing.com'); },
+                        onTap: () {  },
                       ),
                     ],
                   ),

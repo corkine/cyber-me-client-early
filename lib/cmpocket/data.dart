@@ -56,6 +56,7 @@ class Good {
   String name;
   String description;
   String currentState;
+  String currentStateEn;
   String importance;
   String place;
   String message;
@@ -66,6 +67,7 @@ class Good {
       : id = map['id'],
         name = map['name'],
         description = map['description'],
+        currentStateEn = map['currentState'],
         currentState = _handleState(map),
         importance = map['importance'],
         place = map['place'],
