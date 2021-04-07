@@ -198,6 +198,7 @@ class GoodList extends StatelessWidget {
 
   Future<bool> _handleDismiss(
       DismissDirection direction, Good good, BuildContext context) async {
+    final config = Provider.of<Config>(context,listen: false);
     if (direction == DismissDirection.startToEnd) return false;
     return showDialog(
         barrierDismissible: false,
@@ -227,7 +228,7 @@ class GoodList extends StatelessWidget {
             )).then((value) {
       if (value) {
         http
-            .get(Uri.parse(Config.deleteGoodsURL(good.id)))
+            .get(Uri.parse(config.deleteGoodsURL(good.id)))
             .then((value) => jsonDecode(Utf8Codec().decode(value.bodyBytes)))
             .then((value) {
           ScaffoldMessenger.of(context)
@@ -470,11 +471,12 @@ class _GoodAddState extends State<GoodAdd> {
   }
 
   _resetRequest() {
+    final config = Provider.of<Config>(context,listen: false);
     request = http.MultipartRequest(
         'POST',
         Uri.parse(widget.good == null
-            ? Config.goodsAddURL
-            : Config.goodsUpdateURL(widget.good.id)));
+            ? config.goodsAddURL
+            : config.goodsUpdateURL(widget.good.id)));
     request.fields.clear();
   }
 

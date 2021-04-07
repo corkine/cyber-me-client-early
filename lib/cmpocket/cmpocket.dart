@@ -3,6 +3,7 @@ import 'package:learn_flutter/cmpocket/goods.dart';
 import 'package:provider/provider.dart';
 import 'package:learn_flutter/cmpocket/config.dart';
 import 'package:learn_flutter/cmpocket/quicklink.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CMPocket {
@@ -127,10 +128,10 @@ class _PocketHomeState extends State<PocketHome> {
     }
   }
 
-  _callActionButton(int index) {
+  _callActionButton(Config config, int index) {
     switch (index) {
       case 0:
-        showSearch(context: context, delegate: ItemSearchDelegate());
+        showSearch(context: context, delegate: ItemSearchDelegate(config));
         break;
       case 1:
         Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
@@ -153,6 +154,67 @@ class _PocketHomeState extends State<PocketHome> {
     }
   }
 
+  _handleLogin(Config config) {
+    if (config.user.isNotEmpty) {
+      config.user = '';
+      config.password = '';
+      config.justNotify();
+    } else showDialog<List<String>>(
+        context: context,
+        builder: (BuildContext c) {
+          final userController =
+          TextEditingController();
+          final passwordController =
+          TextEditingController();
+          return SimpleDialog(
+            title: Text('输入用户名和登录凭证'),
+            contentPadding: EdgeInsets.all(19),
+            children: [
+              TextField(
+                  controller: userController,
+                  decoration: InputDecoration(
+                      labelText: '用户名')),
+              TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                      labelText: '密码'),
+                  obscureText: true),
+              ButtonBar(
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pop(null);
+                      },
+                      child: Text('取消')),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop([
+                          userController.text,
+                          passwordController.text
+                        ]);
+                      },
+                      child: Text('确定')),
+                ],
+              )
+            ],
+          );
+        }).then((List<String> value) {
+      if (value != null) {
+        config.user = value[0];
+        config.password = value[1];
+        config.justNotify();
+        _savingData(config.user,config.password);
+      }
+    });
+  }
+
+  _savingData(String user, String pass) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('user', user);
+    prefs.setString('password', pass);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<Config>(
@@ -170,33 +232,49 @@ class _PocketHomeState extends State<PocketHome> {
                             image: DecorationImage(
                                 fit: BoxFit.fitWidth,
                                 alignment: Alignment.centerLeft,
-                                image: AssetImage('asserts/images/girl.jpg')
-                            )
-                        ),
+                                image: AssetImage('asserts/images/girl.jpg'))),
                         accountName: Text('Corkine Ma'),
                         accountEmail: Text('corkine@outlook.com'),
-                        currentAccountPicture:
-                        FractionalTranslation(translation: Offset(-0.2,0.1),
-                            child: Icon(Icons.face_unlock_sharp, size: 70, color: Colors.white,)),
+                        currentAccountPicture: FractionalTranslation(
+                            translation: Offset(-0.2, 0.1),
+                            child: Icon(
+                              Icons.face_unlock_sharp,
+                              size: 70,
+                              color: Colors.white,
+                            )),
                       ),
                       ListTile(
                         leading: Icon(Icons.home),
                         title: Text('主页'),
-                        onTap: () { launch('https://mazhangjing.com'); },
+                        onTap: () {
+                          launch('https://mazhangjing.com');
+                        },
                       ),
                       ListTile(
                         leading: Icon(Icons.all_inclusive_sharp),
                         title: Text('博客'),
-                        onTap: () {  },
+                        onTap: () {},
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
-                    child: Text(Config.VERSION, style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12
-                    ),),
+                  Column(
+                    children: [
+                      SizedBox(
+                          width: 200,
+                          child: ElevatedButton(
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(
+                                      Colors.green.shade300)),
+                              onPressed: () => _handleLogin(config),
+                              child: Text(config.user.isEmpty ? '验证秘钥' : '取消登录'))),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15),
+                        child: Text(
+                          Config.VERSION,
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ),
+                    ],
                   )
                 ],
               ),
@@ -216,7 +294,7 @@ class _PocketHomeState extends State<PocketHome> {
                 toolbarHeight: Config.toolBarHeight,
                 actions: _buildActions(config, _index)),
             floatingActionButton: FloatingActionButton(
-              onPressed: () => _callActionButton(_index),
+              onPressed: () => _callActionButton(config, _index),
               child: _buildActionButtonWidget(_index),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

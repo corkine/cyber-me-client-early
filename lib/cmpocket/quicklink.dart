@@ -24,16 +24,18 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
     super.initState();
   }
 
-  Future<List<EntityLog>> fetchData(int limit) async {
-    return http.get(Uri.parse(Config.dataURL(limit))).then((value) {
+  Future<List<EntityLog>> fetchData(Config config, int limit) async {
+    return http.get(Uri.parse(config.dataURL(limit))).then((value) {
       var data = jsonDecode(Utf8Codec().decode(value.bodyBytes));
       return (data as List).map((e) => EntityLog.fromJSON(e)).toList();
     });
   }
 
-  _retry(int limit) => setState(() {
-        _data = fetchData(limit);
-      });
+  _retry(Config config, int limit) {
+    setState(() {
+      _data = fetchData(config, limit);
+    });
+  }
 
   Map<String, List<EntityLog>> _count(List<EntityLog> logs) {
     logs.sort((a, b) => -1 * a.actionTime.compareTo(b.actionTime));
@@ -52,7 +54,7 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
   Widget build(BuildContext context) {
     return Consumer<Config>(
       builder: (BuildContext context, Config config, Widget w) {
-        _data = fetchData(config.shortURLShowLimit);
+        _data = fetchData(config,config.shortURLShowLimit);
         return FutureBuilder(
             future: _data,
             builder: (b, s) {
@@ -61,7 +63,7 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
               if (s.hasError) //如果出错，state 重置，但是 data 不会重置
                 return InkWell(
                     radius: 20,
-                    onTap: () => _retry(config.shortURLShowLimit),
+                    onTap: () => _retry(config, config.shortURLShowLimit),
                     child: Center(child: Text('检索出错，点击重试')));
               if (s.hasData) {
                 Map<String, List<EntityLog>> map = _count(s.data);
@@ -130,7 +132,8 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 100), () {
-      showSearch(context: context, delegate: ItemSearchDelegate());
+      final config = Provider.of(context,listen: false);
+      showSearch(context: context, delegate: ItemSearchDelegate(config));
     });
   }
 
@@ -153,7 +156,8 @@ class _SearchPageState extends State<SearchPage> {
 }
 
 class ItemSearchDelegate extends SearchDelegate<String> {
-  ItemSearchDelegate()
+  final Config config;
+  ItemSearchDelegate(this.config)
       : super(
             searchFieldLabel: '查找或插入',
             searchFieldStyle: TextStyle(color: Colors.grey));
@@ -224,7 +228,7 @@ class ItemSearchDelegate extends SearchDelegate<String> {
   _deleteFromWeb(BuildContext context, String query) {
     if (query == null || query.isEmpty) return;
     http
-        .get(Uri.parse(Config.deleteURL(query)))
+        .get(Uri.parse(config.deleteURL(query)))
         .then((value) => jsonDecode(Utf8Codec().decode(value.bodyBytes)))
         .then((value) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -268,8 +272,8 @@ class _SearchResultState extends State<SearchResult> {
       return widget.keyword;
   }
 
-  Future<List<Entity>> _loadData() {
-    return http.get(Uri.parse(Config.searchURL(_word()))).then((value) =>
+  Future<List<Entity>> _loadData(Config config) {
+    return http.get(Uri.parse(config.searchURL(_word()))).then((value) =>
         (jsonDecode(Utf8Codec().decode(value.bodyBytes)) as List)
             .map((e) => Entity.fromJSON(e))
             .toList());
@@ -280,8 +284,8 @@ class _SearchResultState extends State<SearchResult> {
     super.initState();
   }
 
-  _retry() => setState(() {
-        _future = _loadData();
+  _retry(Config config) => setState(() {
+        _future = _loadData(config);
       });
 
   final style = TextStyle(color: Colors.black, fontSize: 16);
@@ -313,7 +317,8 @@ class _SearchResultState extends State<SearchResult> {
 
   @override
   Widget build(BuildContext context) {
-    _future = _loadData();
+    final config = Provider.of<Config>(context,listen: false);
+    _future = _loadData(config);
     return FutureBuilder(
         future: _future,
         builder: (c, s) {
@@ -335,7 +340,7 @@ class _SearchResultState extends State<SearchResult> {
             );
           }
           if (s.hasError) {
-            return InkWell(onTap: _retry(), child: Text('出错了，请重试'));
+            return InkWell(onTap: _retry(config), child: Text('出错了，请重试'));
           }
           if (s.hasData) {
             List<Entity> data = s.data;
@@ -387,7 +392,7 @@ class _SearchResultState extends State<SearchResult> {
                           if (value) {
                             http
                                 .get(Uri.parse(
-                                    Config.deleteURL(data[i].keyword)))
+                                    config.deleteURL(data[i].keyword)))
                                 .then((value) => jsonDecode(
                                     Utf8Codec().decode(value.bodyBytes)))
                                 .then((value) {
@@ -438,11 +443,12 @@ class _AddDialogState extends State<AddDialog> {
   String _text = '';
   @override
   Widget build(BuildContext context) {
+    final config = Provider.of<Config>(context,listen: false);
     return SimpleDialog(title: Text('添加关键字 ${widget.query}'), children: [
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 0),
         child: Text(
-          '将原始地址跳转到 ${Config.basicURL}/${widget.query}',
+          '将原始地址跳转到 ${config.basicURL}/${widget.query}',
           style: TextStyle(fontSize: 12),
         ),
       ),
@@ -462,13 +468,13 @@ class _AddDialogState extends State<AddDialog> {
                 Navigator.of(context).pop();
               },
               child: Text('取消')),
-          TextButton(onPressed: _submitData, child: Text('确定')),
+          TextButton(onPressed: () => _submitData(config), child: Text('确定')),
         ],
       )
     ]);
   }
 
-  _submitData() {
+  _submitData(Config config) {
     final url = _text;
     final keywords = widget.query;
     if (url == null || url.isEmpty || keywords == null || keywords.isEmpty) {
@@ -477,10 +483,10 @@ class _AddDialogState extends State<AddDialog> {
           .showSnackBar(SnackBar(content: Text('没有数据')));
     } else
       http
-          .post(Uri.parse(Config.addURL),
+          .post(Uri.parse(config.addURL),
               headers: {
                 "content-type": "application/json",
-                HttpHeaders.authorizationHeader: Config.base64Token
+                HttpHeaders.authorizationHeader: config.base64Token
               },
               body: utf8.encode(json.encode({
                 'keyword': keywords,
