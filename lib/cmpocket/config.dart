@@ -26,7 +26,11 @@ class Config extends ChangeNotifier {
   static const headerStyle = TextStyle(fontSize: 20);
   static const smallHeaderStyle = TextStyle(fontSize: 13);
   static const formHelperStyle = TextStyle(color: Colors.grey,fontSize: 10);
-  static const VERSION = 'VERSION 1.0.4, Build@2021-04-07';
+  static const VERSION = 'VERSION 1.0.5, Build@2021-04-07';
+  /*
+  1.0.4 修复了 Goods 标题显示详情问题，新键项目添加图片表单信息丢失问题，添加/修改返回后列表不更新问题
+  1.0.5 修复了 QuickLink 非去重时的数据折叠问题
+  */
 
   String goodsURL() {
     return 'https://status.mazhangjing.com/goods/data$token&hideRemove=$notShowRemoved&hideClothes=$notShowClothes'

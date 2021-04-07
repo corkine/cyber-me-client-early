@@ -65,7 +65,10 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
                     child: Center(child: Text('检索出错，点击重试')));
               if (s.hasData) {
                 Map<String, List<EntityLog>> map = _count(s.data);
-                List<EntityLog> logs = map.values.map((e) => e[0]).toList();
+                List<EntityLog> logs;
+                config.filterDuplicate
+                    ? logs = map.values.map((e) => e[0]).toList()
+                    : logs = s.data;
                 return ListView.builder(
                     itemCount: logs.length,
                     itemBuilder: (c, i) => ListTile(
