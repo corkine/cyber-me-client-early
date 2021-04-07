@@ -103,6 +103,8 @@ class _PocketHomeState extends State<PocketHome> {
                   return config.setNotShowClothes(!config.notShowClothes);
                 case 3:
                   return config.setNotShowRemoved(!config.notShowRemoved);
+                case 4:
+                  return config.setNotShowArchive(!config.notShowArchive);
                 default:
                   return;
               }
@@ -112,7 +114,8 @@ class _PocketHomeState extends State<PocketHome> {
                 [0, '按照名称排序', config.goodsShortByName],
                 [1, '按照最近排序', config.goodsRecentFirst],
                 [2, '显示衣物', !config.notShowClothes],
-                [3, '显示已删除', !config.notShowRemoved]
+                [3, '显示已删除', !config.notShowRemoved],
+                [4, '显示收纳', !config.notShowArchive]
               ].map((List e) {
                 return PopupMenuItem(
                     child: Text(e[2] ? '✅ ' + e[1] : '❎ ' + e[1]),

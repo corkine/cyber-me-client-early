@@ -52,7 +52,14 @@ class _GoodsHomeState extends State<GoodsHome> {
                     radius: 20,
                     onTap: () => _retry(config),
                     child: Center(child: Text('检索出错，点击重试')));
-              if (s.hasData) return GoodList(s.data);
+              if (s.hasData) {
+                final List<Good> data = s.data;
+                return GoodList(config.notShowArchive
+                    ? data
+                        .where((element) => element.currentStateEn != 'Archive')
+                        .toList()
+                    : data);
+              }
               return Center(
                 child: Text('没有数据'),
               );
@@ -154,7 +161,7 @@ class GoodList extends StatelessWidget {
                             ])),
                         subtitle: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
                               decoration: BoxDecoration(

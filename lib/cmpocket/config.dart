@@ -26,7 +26,7 @@ class Config extends ChangeNotifier {
   static const headerStyle = TextStyle(fontSize: 20);
   static const smallHeaderStyle = TextStyle(fontSize: 13);
   static const formHelperStyle = TextStyle(color: Colors.grey,fontSize: 10);
-  static const VERSION = 'VERSION 1.0.2, Build@2021-04-07';
+  static const VERSION = 'VERSION 1.0.3, Build@2021-04-07';
 
   String goodsURL() {
     return 'https://status.mazhangjing.com/goods/data$token&hideRemove=$notShowRemoved&hideClothes=$notShowClothes'
@@ -45,6 +45,7 @@ class Config extends ChangeNotifier {
   bool goodsRecentFirst = true;
   bool notShowClothes = true;
   bool notShowRemoved = true;
+  bool notShowArchive = true;
 
   setGoodsShortByName(bool res) {
     goodsShortByName = res;
@@ -63,6 +64,11 @@ class Config extends ChangeNotifier {
 
   setNotShowRemoved(bool res) {
     notShowRemoved = res;
+    notifyListeners();
+  }
+
+  setNotShowArchive(bool res) {
+    notShowArchive = res;
     notifyListeners();
   }
 
