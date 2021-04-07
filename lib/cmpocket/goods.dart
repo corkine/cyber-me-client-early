@@ -196,8 +196,8 @@ class GoodList extends StatelessWidget {
             ));
   }
 
-  Future<bool> _handleDismiss(DismissDirection direction,
-      Good good, BuildContext context) async {
+  Future<bool> _handleDismiss(
+      DismissDirection direction, Good good, BuildContext context) async {
     if (direction == DismissDirection.startToEnd) return false;
     return showDialog(
         barrierDismissible: false,
@@ -438,24 +438,18 @@ class _GoodAddState extends State<GoodAdd> {
                       ],
                     ),
                   )),
-              good == null
-                  ? _image != null
-                      ? Image.file(_image, width: 100)
+              //新键（good == null,_image == null）时直接返回空，新键拍照后（good == null,_image != null）展示预览，
+              //更新（good != null,_image == null）时没有图片(good != null,_image == null,good.picture == null)返回空，
+              //有图片(good != null,_image == null,good.picture != null)返回图片，更新拍照(good != null,_image == null,
+              //_image != null)后展示预览。
+              _image != null
+                  ? Image.file(_image, width: 100)
+                  : good != null && good.picture != null
+                      ? Image.network(good.picture, width: 100)
                       : SizedBox(
                           height: 1,
                           width: 1,
                         )
-                  : good.picture == null
-                      ? _image == null
-                          ? SizedBox(
-                              height: 1,
-                              width: 1,
-                            )
-                          : Image.file(
-                              _image,
-                              width: 100,
-                            )
-                      : Image.network(good.picture, width: 100),
             ],
           ),
           ButtonBar(
@@ -485,7 +479,7 @@ class _GoodAddState extends State<GoodAdd> {
   }
 
   _handleFetch() async {
-    if (_image == null) {
+    if (_image == null) { //_image 为空则拍照更新，反之则将其置为空，新键或更新对其无影响
       final pickedFile = await _picker.getImage(source: ImageSource.camera);
       File image;
       if (pickedFile != null) {
@@ -525,7 +519,8 @@ class _GoodAddState extends State<GoodAdd> {
         formKey.currentState.save();
         print(request.fields);
         if (_image != null) {
-          //新建，有新图片 或者 修改，更新图片。当新建时没有添加图片，或者修改图片未更改，则不做处理。
+          //新建，有新图片 或者 修改，更新图片。
+          //当新建时没有添加图片，或者修改图片未更改（_image 始终为空），则不做处理。
           final file =
               await http.MultipartFile.fromPath('picture', _image.path);
           request.files.add(file);
@@ -538,7 +533,7 @@ class _GoodAddState extends State<GoodAdd> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(result['message'])));
         Navigator.of(context).pop();
-        final model = Provider.of<Config>(context,listen: false);
+        final model = Provider.of<Config>(context, listen: false);
         model.justNotify();
         failed = false;
         return result;
