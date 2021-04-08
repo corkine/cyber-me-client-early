@@ -1,3 +1,5 @@
+import 'package:learn_flutter/cmpocket/config.dart';
+
 class EntityLog {
   String iPInfo;
   String keyword;
@@ -97,6 +99,41 @@ class Good {
         return '外借';
       default:
         return res;
+    }
+  }
+
+  static compare(Config c, Good a, Good b) {
+    final imp = a.importance.compareTo(b.importance);
+    if (imp != 0) return imp; //最重要在前
+    final cus = _status(a.currentStateEn) - _status(b.currentStateEn);
+    if (cus != 0)
+      return cus; //状态活跃在前
+    else {
+      return c.showUpdateButNotCreateTime
+          ? -1 * a.updateTime.compareTo(b.updateTime) //最新修改在前
+          : -1 * a.addTime.compareTo(b.addTime); //最新创建在前
+    }
+  }
+
+  static _status(String cs) {
+    final css = cs.toUpperCase();
+    switch (css) {
+      case 'ACTIVE':
+        return 1;
+      case 'ORDINARY':
+        return 2;
+      case 'NOTACTIVE':
+        return 3;
+      case 'ARCHIVE':
+        return 4;
+      case 'REMOVE':
+        return 5;
+      case 'BORROW':
+        return 6;
+      case 'LOST':
+        return 7;
+      default:
+        return 8;
     }
   }
 }

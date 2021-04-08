@@ -107,17 +107,23 @@ class _PocketHomeState extends State<PocketHome> {
                   return config.setNotShowRemoved(!config.notShowRemoved);
                 case 4:
                   return config.setNotShowArchive(!config.notShowArchive);
+                case 5:
+                  return config.setShowUpdateButNotCreateTime(!config.showUpdateButNotCreateTime);
+                case 6:
+                  return config.setAutoCopyToClipboard(!config.autoCopyToClipboard);
                 default:
                   return;
               }
             },
             itemBuilder: (c) {
               return [
-                [0, '按照名称排序', config.goodsShortByName],
-                [1, '按照最近排序', config.goodsRecentFirst],
+                /*[0, '按照名称排序', config.goodsShortByName],
+                [1, '按照最近排序', config.goodsRecentFirst],*/
                 [2, '显示衣物', !config.notShowClothes],
                 [3, '显示已删除', !config.notShowRemoved],
-                [4, '显示收纳', !config.notShowArchive]
+                [4, '显示收纳', !config.notShowArchive],
+                [5, '显示更新而非创建日期', config.showUpdateButNotCreateTime],
+                [6, '打开项目后将链接拷贝到剪贴板', config.autoCopyToClipboard]
               ].map((List e) {
                 return PopupMenuItem(
                     child: Text(e[2] ? '✅ ' + e[1] : '❎ ' + e[1]),
@@ -213,6 +219,12 @@ class _PocketHomeState extends State<PocketHome> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('user', user);
     prefs.setString('password', pass);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
   }
 
   @override

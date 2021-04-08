@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:clipboard/clipboard.dart';
 
 class GoodsHome extends StatefulWidget {
   @override
@@ -54,6 +56,7 @@ class _GoodsHomeState extends State<GoodsHome> {
                     child: Center(child: Text('检索出错，点击重试')));
               if (s.hasData) {
                 final List<Good> data = s.data;
+                data.sort((Good a, Good b) => Good.compare(config, a, b));
                 return GoodList(config.notShowArchive
                     ? data
                         .where((element) => element.currentStateEn != 'Archive')
@@ -74,6 +77,7 @@ class GoodList extends StatelessWidget {
   const GoodList(this.goods);
   @override
   Widget build(BuildContext context) {
+    final config = Provider.of<Config>(context, listen: false);
     return ListView.builder(
         itemCount: goods.length,
         itemBuilder: (c, i) => Dismissible(
@@ -125,6 +129,18 @@ class GoodList extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () {
+                      final config =
+                          Provider.of<Config>(context, listen: false);
+                      launch(config.goodsView(goods[i]));
+                      if (config.autoCopyToClipboard)
+                        FlutterClipboard.copy(config.goodsViewNoToken(goods[i]))
+                            .then((value) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(''
+                                  '访问链接已拷贝到剪贴板（不包含秘钥）')));
+                        });
+                    },
+                    onLongPress: () {
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (BuildContext context) {
                         return GoodAdd(goods[i]);
@@ -154,8 +170,10 @@ class GoodList extends StatelessWidget {
                                 children: [
                               TextSpan(
                                   text: '  ' +
-                                      DateFormat('yy/M/d')
-                                          .format(goods[i].updateTime),
+                                      DateFormat('yy/M/d').format(
+                                          config.showUpdateButNotCreateTime
+                                              ? goods[i].updateTime
+                                              : goods[i].addTime),
                                   style: TextStyle(
                                       color: Colors.grey, fontSize: 12))
                             ])),
@@ -198,7 +216,7 @@ class GoodList extends StatelessWidget {
 
   Future<bool> _handleDismiss(
       DismissDirection direction, Good good, BuildContext context) async {
-    final config = Provider.of<Config>(context,listen: false);
+    final config = Provider.of<Config>(context, listen: false);
     if (direction == DismissDirection.startToEnd) return false;
     return showDialog(
         barrierDismissible: false,
@@ -471,7 +489,7 @@ class _GoodAddState extends State<GoodAdd> {
   }
 
   _resetRequest() {
-    final config = Provider.of<Config>(context,listen: false);
+    final config = Provider.of<Config>(context, listen: false);
     request = http.MultipartRequest(
         'POST',
         Uri.parse(widget.good == null
@@ -481,7 +499,8 @@ class _GoodAddState extends State<GoodAdd> {
   }
 
   _handleFetch() async {
-    if (_image == null) { //_image 为空则拍照更新，反之则将其置为空，新键或更新对其无影响
+    if (_image == null) {
+      //_image 为空则拍照更新，反之则将其置为空，新键或更新对其无影响
       final pickedFile = await _picker.getImage(source: ImageSource.camera);
       File image;
       if (pickedFile != null) {
