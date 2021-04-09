@@ -39,14 +39,19 @@ class _PocketHomeState extends State<PocketHome> {
               style: Config.smallHeaderStyle)
         ]));
       case 1:
-        return RichText(
-            text: TextSpan(text: '物品管理', style: Config.headerStyle, children: [
-          TextSpan(
-              text: ' ('
-                  '${config.notShowRemoved ? '不' : ''}显示删除, '
-                  '${config.notShowArchive ? '不' : ''}显示收纳)',
-              style: Config.smallHeaderStyle)
-        ]));
+        return config.useReorderableListView
+            ? Text('拖动条目以排序', style: Config.headerStyle)
+            : RichText(
+                text: TextSpan(
+                    text: '物品管理',
+                    style: Config.headerStyle,
+                    children: [
+                    TextSpan(
+                        text: ' ('
+                            '${config.notShowRemoved ? '不' : ''}显示删除, '
+                            '${config.notShowArchive ? '不' : ''}显示收纳)',
+                        style: Config.smallHeaderStyle)
+                  ]));
       case 2:
         return Text('健康管理');
       default:
@@ -92,48 +97,70 @@ class _PocketHomeState extends State<PocketHome> {
             })
       ];
     } else {
-      return [
-        PopupMenuButton<int>(
-            icon: Icon(Icons.more_vert_rounded),
-            onSelected: (e) {
-              switch (e) {
-                case 0:
-                  return config.setGoodsShortByName(!config.goodsShortByName);
-                case 1:
-                  return config.setGoodsRecentFirst(!config.goodsRecentFirst);
-                case 2:
-                  return config.setNotShowClothes(!config.notShowClothes);
-                case 3:
-                  return config.setNotShowRemoved(!config.notShowRemoved);
-                case 4:
-                  return config.setNotShowArchive(!config.notShowArchive);
-                case 5:
-                  return config.setShowUpdateButNotCreateTime(!config.showUpdateButNotCreateTime);
-                case 6:
-                  return config.setAutoCopyToClipboard(!config.autoCopyToClipboard);
-                case 7:
-                  return config.setUseReorderableListView(!config.useReorderableListView);
-                default:
-                  return;
-              }
-            },
-            itemBuilder: (c) {
-              return [
-                /*[0, '按照名称排序', config.goodsShortByName],
+      return config.useReorderableListView
+          ? [
+              ElevatedButton(
+                onPressed: () {
+                  config.setUseReorderableListView(false);
+                },
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 3),
+                      child: Icon(Icons.done),
+                    ),
+                    Text('确定')
+                  ],
+                ),
+              )
+            ]
+          : [
+              PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert_rounded),
+                  onSelected: (e) {
+                    switch (e) {
+                      case 0:
+                        return config
+                            .setGoodsShortByName(!config.goodsShortByName);
+                      case 1:
+                        return config
+                            .setGoodsRecentFirst(!config.goodsRecentFirst);
+                      case 2:
+                        return config.setNotShowClothes(!config.notShowClothes);
+                      case 3:
+                        return config.setNotShowRemoved(!config.notShowRemoved);
+                      case 4:
+                        return config.setNotShowArchive(!config.notShowArchive);
+                      case 5:
+                        return config.setShowUpdateButNotCreateTime(
+                            !config.showUpdateButNotCreateTime);
+                      case 6:
+                        return config.setAutoCopyToClipboard(
+                            !config.autoCopyToClipboard);
+                      case 7:
+                        return config.setUseReorderableListView(
+                            !config.useReorderableListView);
+                      default:
+                        return;
+                    }
+                  },
+                  itemBuilder: (c) {
+                    return [
+                      /*[0, '按照名称排序', config.goodsShortByName],
                 [1, '按照最近排序', config.goodsRecentFirst],*/
-                [2, '显示衣物', !config.notShowClothes],
-                [3, '显示已删除', !config.notShowRemoved],
-                [4, '显示收纳', !config.notShowArchive],
-                [5, '显示更新而非创建日期', config.showUpdateButNotCreateTime],
-                [6, '将链接拷贝到剪贴板', config.autoCopyToClipboard],
-                [7, '排序模式（仅限同状态和重要度项目排序）', config.useReorderableListView]
-              ].map((List e) {
-                return PopupMenuItem(
-                    child: Text(e[2] ? '✅ ' + e[1] : '❎ ' + e[1]),
-                    value: e[0] as int);
-              }).toList();
-            })
-      ];
+                      [2, '显示衣物', !config.notShowClothes],
+                      [3, '显示已删除', !config.notShowRemoved],
+                      [4, '显示收纳', !config.notShowArchive],
+                      [5, '显示更新而非创建日期', config.showUpdateButNotCreateTime],
+                      [6, '将链接拷贝到剪贴板', config.autoCopyToClipboard],
+                      [7, '排序模式（仅限同状态和重要度项目排序）', config.useReorderableListView]
+                    ].map((List e) {
+                      return PopupMenuItem(
+                          child: Text(e[2] ? '✅ ' + e[1] : '❎ ' + e[1]),
+                          value: e[0] as int);
+                    }).toList();
+                  })
+            ];
     }
   }
 
@@ -168,54 +195,48 @@ class _PocketHomeState extends State<PocketHome> {
       config.user = '';
       config.password = '';
       config.justNotify();
-    } else showDialog<List<String>>(
-        context: context,
-        builder: (BuildContext c) {
-          final userController =
-          TextEditingController();
-          final passwordController =
-          TextEditingController();
-          return SimpleDialog(
-            title: Text('输入用户名和登录凭证'),
-            contentPadding: EdgeInsets.all(19),
-            children: [
-              TextField(
-                  controller: userController,
-                  decoration: InputDecoration(
-                      labelText: '用户名')),
-              TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                      labelText: '密码'),
-                  obscureText: true),
-              ButtonBar(
-                children: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context)
-                            .pop(null);
-                      },
-                      child: Text('取消')),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop([
-                          userController.text,
-                          passwordController.text
-                        ]);
-                      },
-                      child: Text('确定')),
-                ],
-              )
-            ],
-          );
-        }).then((List<String> value) {
-      if (value != null) {
-        config.user = value[0];
-        config.password = value[1];
-        config.justNotify();
-        _savingData(config.user,config.password);
-      }
-    });
+    } else
+      showDialog<List<String>>(
+          context: context,
+          builder: (BuildContext c) {
+            final userController = TextEditingController();
+            final passwordController = TextEditingController();
+            return SimpleDialog(
+              title: Text('输入用户名和登录凭证'),
+              contentPadding: EdgeInsets.all(19),
+              children: [
+                TextField(
+                    controller: userController,
+                    decoration: InputDecoration(labelText: '用户名')),
+                TextField(
+                    controller: passwordController,
+                    decoration: InputDecoration(labelText: '密码'),
+                    obscureText: true),
+                ButtonBar(
+                  children: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(null);
+                        },
+                        child: Text('取消')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(
+                              [userController.text, passwordController.text]);
+                        },
+                        child: Text('确定')),
+                  ],
+                )
+              ],
+            );
+          }).then((List<String> value) {
+        if (value != null) {
+          config.user = value[0];
+          config.password = value[1];
+          config.justNotify();
+          _savingData(config.user, config.password);
+        }
+      });
   }
 
   _savingData(String user, String pass) async {
@@ -227,7 +248,6 @@ class _PocketHomeState extends State<PocketHome> {
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -281,7 +301,8 @@ class _PocketHomeState extends State<PocketHome> {
                                   backgroundColor: MaterialStateProperty.all(
                                       Colors.green.shade300)),
                               onPressed: () => _handleLogin(config),
-                              child: Text(config.user.isEmpty ? '验证秘钥' : '取消登录'))),
+                              child:
+                                  Text(config.user.isEmpty ? '验证秘钥' : '取消登录'))),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 15),
                         child: Text(

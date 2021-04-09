@@ -96,29 +96,30 @@ class _GoodListState extends State<GoodList> {
     config.position = 0.0; //重置保存的位置，下次 longPress 修改保存此值
     return config.useReorderableListView
         ? ReorderableListView.builder(
-        itemBuilder: (c, i) =>
-            buildDismissible(i, context, _controller, config, goods),
-        itemCount: goods.length,
-        scrollController: _controller,
-        onReorder: (int o, int n) {
-          if (o < n) n -= 1;
-          final Good old = goods.removeAt(o);
-          //print('Old $old index is $o，new index is $n');
-          goods.insert(n, old);
-          if (n + 1 < goods.length) {
-            final top = n >= 1 ? map[goods[n - 1].id] : 0;
-            final bottom = map[goods[n + 1].id];
-            //print('top is$top, bottom is $bottom');
-            final choose = Random().nextInt(bottom - top) + top; //可能等于顶部值
-            //print('random is $choose');
-            map[old.id] = choose;
-          }
-        })
+            buildDefaultDragHandles: true,
+            itemBuilder: (c, i) =>
+                buildDismissible(i, context, _controller, config, goods),
+            itemCount: goods.length,
+            scrollController: _controller,
+            onReorder: (int o, int n) {
+              if (o < n) n -= 1;
+              final Good old = goods.removeAt(o);
+              //print('Old $old index is $o，new index is $n');
+              goods.insert(n, old);
+              if (n + 1 < goods.length) {
+                final top = n >= 1 ? map[goods[n - 1].id] : 0;
+                final bottom = map[goods[n + 1].id];
+                //print('top is$top, bottom is $bottom');
+                final choose = Random().nextInt(bottom - top) + top; //可能等于顶部值
+                //print('random is $choose');
+                map[old.id] = choose;
+              }
+            })
         : ListView.builder(
-        controller: _controller,
-        itemCount: goods.length,
-        itemBuilder: (c, i) =>
-            buildDismissible(i, context, _controller, config, goods));
+            controller: _controller,
+            itemCount: goods.length,
+            itemBuilder: (c, i) =>
+                buildDismissible(i, context, _controller, config, goods));
   }
 
   Dismissible buildDismissible(int i, BuildContext context,
@@ -154,6 +155,9 @@ class _GoodListState extends State<GoodList> {
         setState(() => goods.removeAt(i));
       },
       child: Card(
+        margin: config.useReorderableListView
+            ? EdgeInsets.only(bottom: 1, top: 1)
+            : EdgeInsets.all(4.0),
         child: Stack(children: [
           Opacity(
             opacity: 0.2,
@@ -161,97 +165,101 @@ class _GoodListState extends State<GoodList> {
               color: goods[i].picture != null ? null : Colors.blueGrey,
               decoration: goods[i].picture != null
                   ? BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(goods[i].picture),
-                    fit: BoxFit.fitWidth,
-                    colorFilter:
-                    ColorFilter.mode(Colors.white12, BlendMode.color),
-                    alignment: Alignment(0, -0.5),
-                  ))
+                      image: DecorationImage(
+                      image: NetworkImage(goods[i].picture),
+                      fit: BoxFit.fitWidth,
+                      colorFilter:
+                          ColorFilter.mode(Colors.white12, BlendMode.color),
+                      alignment: Alignment(0, -0.5),
+                    ))
                   : null,
               width: double.infinity,
               height: 100,
             ),
           ),
-          InkWell(
-            onTap: () {
-              final config = Provider.of<Config>(context, listen: false);
-              launch(config.goodsView(goods[i]));
-              if (config.autoCopyToClipboard)
-                FlutterClipboard.copy(config.goodsViewNoToken(goods[i]))
-                    .then((value) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('外部访问链接已拷贝到剪贴板')));
-                });
-            },
-            onLongPress: () {
-              final config = Provider.of<Config>(context, listen: false);
-              config.position = _controller.offset;
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (BuildContext context) {
-                return GoodAdd(goods[i]);
-              }));
-            },
-            child: Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 100,
-              child: ListTile(
-                tileColor: Colors.transparent,
-                leading: Padding(
-                  padding: const EdgeInsets.only(top: 5, right: 9),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.blueGrey.shade200,
-                    foregroundColor: Colors.white,
-                    child: Text(goods[i].name.substring(0, 1).toUpperCase()),
-                  ),
-                ),
-                horizontalTitleGap: 0,
-                title: RichText(
-                    text: TextSpan(
-                        text: goods[i].name,
-                        style: TextStyle(color: Colors.black, fontSize: 18),
-                        children: [
-                          TextSpan(
-                              text: '  ' +
-                                  DateFormat('yy/M/d').format(
-                                      config.showUpdateButNotCreateTime
-                                          ? goods[i].updateTime
-                                          : goods[i].addTime),
-                              style: TextStyle(color: Colors.grey, fontSize: 12))
-                        ])),
-                subtitle: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white54),
-                      padding: const EdgeInsets.only(
-                          left: 6, right: 6, top: 1, bottom: 1),
-                      child: Text(
-                          goods[i].importance + ' | ' + goods[i].currentState),
-                    ),
-                    SizedBox(
-                      width: 7,
-                    ),
-                    Expanded(
-                      child: Text(
-                        goods[i].description ?? '',
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: Colors.grey.shade700, fontSize: 13),
-                      ),
-                    )
-                  ],
-                ),
-                trailing: null,
-              ),
-            ),
-          )
+          config.useReorderableListView
+              ? InkWell(child: buildContainer(goods, i, config))
+              : InkWell(
+                  onTap: () {
+                    final config = Provider.of<Config>(context, listen: false);
+                    launch(config.goodsView(goods[i]));
+                    if (config.autoCopyToClipboard)
+                      FlutterClipboard.copy(config.goodsViewNoToken(goods[i]))
+                          .then((value) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('外部访问链接已拷贝到剪贴板')));
+                      });
+                  },
+                  onLongPress: () {
+                    final config = Provider.of<Config>(context, listen: false);
+                    config.position = _controller.offset;
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return GoodAdd(goods[i]);
+                    }));
+                  },
+                  child: buildContainer(goods, i, config),
+                )
         ]),
+      ),
+    );
+  }
+
+  Container buildContainer(List<Good> goods, int i, Config config) {
+    return Container(
+      alignment: Alignment.center,
+      width: double.infinity,
+      height: 100,
+      child: ListTile(
+        tileColor: Colors.transparent,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 5, right: 9),
+          child: CircleAvatar(
+            backgroundColor: Colors.blueGrey.shade200,
+            foregroundColor: Colors.white,
+            child: Text(goods[i].name.substring(0, 1).toUpperCase()),
+          ),
+        ),
+        horizontalTitleGap: 0,
+        title: RichText(
+            text: TextSpan(
+                text: goods[i].name,
+                style: TextStyle(color: Colors.black, fontSize: 18),
+                children: [
+              TextSpan(
+                  text: '  ' +
+                      DateFormat('yy/M/d').format(
+                          config.showUpdateButNotCreateTime
+                              ? goods[i].updateTime
+                              : goods[i].addTime),
+                  style: TextStyle(color: Colors.grey, fontSize: 12))
+            ])),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white54),
+              padding:
+                  const EdgeInsets.only(left: 6, right: 6, top: 1, bottom: 1),
+              child: Text(goods[i].importance + ' | ' + goods[i].currentState),
+            ),
+            SizedBox(
+              width: 7,
+            ),
+            Expanded(
+              child: Text(
+                goods[i].description ?? '',
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              ),
+            )
+          ],
+        ),
+        trailing: null,
       ),
     );
   }
@@ -264,28 +272,28 @@ class _GoodListState extends State<GoodList> {
         barrierDismissible: false,
         context: context,
         builder: (c) => AlertDialog(
-          title: Text('确认删除 ${good.name} 吗？'),
-          content: Text('此操作不可取消'),
-          actions: [
-            ButtonBar(
-              children: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text('取消')),
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                    child: Text(
-                      '确认',
-                      style: TextStyle(color: Colors.red),
-                    ))
+              title: Text('确认删除 ${good.name} 吗？'),
+              content: Text('此操作不可取消'),
+              actions: [
+                ButtonBar(
+                  children: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: Text('取消')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        child: Text(
+                          '确认',
+                          style: TextStyle(color: Colors.red),
+                        ))
+                  ],
+                )
               ],
-            )
-          ],
-        )).then((value) {
+            )).then((value) {
       if (value) {
         http
             .get(Uri.parse(config.deleteGoodsURL(good.id)))
@@ -301,7 +309,6 @@ class _GoodListState extends State<GoodList> {
     });
   }
 }
-
 
 class GoodAdd extends StatefulWidget {
   final Good good;
@@ -375,9 +382,14 @@ class _GoodAddState extends State<GoodAdd> {
             initialValue: good == null ? '' : good.description ?? '',
             autocorrect: false,
             decoration: InputDecoration(labelText: '描述'),
-            onSaved: (d) => d != null && d.isNotEmpty
-                ? request.fields['description'] = d
-                : null,
+            onSaved: (d) => good != null
+                ? good.description != null &&
+                        d.isEmpty //当进行更新时如果原来 description 不为空，现在为空
+                    ? request.fields['description'] = '' //删除字段
+                    : request.fields['description'] = d //更新字段
+                : d.isNotEmpty //当进行新建时，如果不为空，则添加字段，反之不添加
+                    ? request.fields['description'] = d
+                    : null,
           ),
           SizedBox(height: 17),
           DropdownButtonFormField<String>(
@@ -451,27 +463,36 @@ class _GoodAddState extends State<GoodAdd> {
               ]),
           SizedBox(height: 7),
           TextFormField(
-            initialValue: good == null ? '' : good.place ?? '',
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: '位置',
-                helperText: '物品一般放置位置',
-                helperStyle: Config.formHelperStyle),
-            onSaved: (d) =>
-                d != null && d.isNotEmpty ? request.fields['place'] = d : null,
-          ),
+              initialValue: good == null ? '' : good.place ?? '',
+              autocorrect: false,
+              decoration: InputDecoration(
+                  labelText: '位置',
+                  helperText: '物品一般放置位置',
+                  helperStyle: Config.formHelperStyle),
+              onSaved: (d) => good != null
+                  ? good.place != null && d.isEmpty //当进行更新时如果原来 place 不为空，现在为空
+                      ? request.fields['place'] = '' //删除字段
+                      : request.fields['place'] = d //更新字段
+                  : d.isNotEmpty //当进行新建时，如果不为空，则添加字段，反之不添加
+                      ? request.fields['place'] = d
+                      : null),
           SizedBox(height: 7),
           TextFormField(
-            initialValue: good == null ? '' : good.message ?? '',
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: '消息',
-                helperText: '他人扫码可见内容',
-                helperStyle: Config.formHelperStyle),
-            onSaved: (d) => d != null && d.isNotEmpty
-                ? request.fields['message'] = d
-                : null,
-          ),
+              initialValue: good == null ? '' : good.message ?? '',
+              autocorrect: false,
+              decoration: InputDecoration(
+                  labelText: '消息',
+                  helperText: '他人扫码可见内容',
+                  helperStyle: Config.formHelperStyle),
+              onSaved: (d) => good != null
+                  ? good.message != null && d.isEmpty //当进行更新时如果原来消息不为空，现在为空
+                      ? request.fields['message'] = '' //删除字段
+                      : request.fields['message'] = d //更新字段
+                  : d.isNotEmpty //当进行新建时，如果不为空，则添加字段，反之不添加
+                      ? request.fields['message'] = d
+                      : null
+              //（服务端实现有问题，当不提供字段时，默认使用原始值，当提供字段时，使用新字段，不能设置为 null）
+              ),
           SizedBox(height: 7),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
