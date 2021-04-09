@@ -108,10 +108,13 @@ class Good {
     final cus = _status(a.currentStateEn) - _status(b.currentStateEn);
     if (cus != 0)
       return cus; //状态活跃在前
-    else {
+    /*else {
       return c.showUpdateButNotCreateTime
           ? -1 * a.updateTime.compareTo(b.updateTime) //最新修改在前
           : -1 * a.addTime.compareTo(b.addTime); //最新创建在前
+    }*/
+    else {
+      return 1 * ((c.map[a.id] ?? 0).compareTo(c.map[b.id] ?? 0));
     }
   }
 

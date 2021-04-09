@@ -111,6 +111,8 @@ class _PocketHomeState extends State<PocketHome> {
                   return config.setShowUpdateButNotCreateTime(!config.showUpdateButNotCreateTime);
                 case 6:
                   return config.setAutoCopyToClipboard(!config.autoCopyToClipboard);
+                case 7:
+                  return config.setUseReorderableListView(!config.useReorderableListView);
                 default:
                   return;
               }
@@ -123,7 +125,8 @@ class _PocketHomeState extends State<PocketHome> {
                 [3, '显示已删除', !config.notShowRemoved],
                 [4, '显示收纳', !config.notShowArchive],
                 [5, '显示更新而非创建日期', config.showUpdateButNotCreateTime],
-                [6, '打开项目后将链接拷贝到剪贴板', config.autoCopyToClipboard]
+                [6, '将链接拷贝到剪贴板', config.autoCopyToClipboard],
+                [7, '排序模式（仅限同状态和重要度项目排序）', config.useReorderableListView]
               ].map((List e) {
                 return PopupMenuItem(
                     child: Text(e[2] ? '✅ ' + e[1] : '❎ ' + e[1]),

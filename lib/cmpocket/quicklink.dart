@@ -54,7 +54,7 @@ class _QuickLinkPageState extends State<QuickLinkPage> {
   Widget build(BuildContext context) {
     return Consumer<Config>(
       builder: (BuildContext context, Config config, Widget w) {
-        _data = fetchData(config,config.shortURLShowLimit);
+        _data = fetchData(config, config.shortURLShowLimit);
         return FutureBuilder(
             future: _data,
             builder: (b, s) {
@@ -132,7 +132,7 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 100), () {
-      final config = Provider.of(context,listen: false);
+      final config = Provider.of(context, listen: false);
       showSearch(context: context, delegate: ItemSearchDelegate(config));
     });
   }
@@ -317,7 +317,7 @@ class _SearchResultState extends State<SearchResult> {
 
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<Config>(context,listen: false);
+    final config = Provider.of<Config>(context, listen: false);
     _future = _loadData(config);
     return FutureBuilder(
         future: _future,
@@ -408,6 +408,11 @@ class _SearchResultState extends State<SearchResult> {
                       } else
                         return false;
                     },
+                    onDismissed: (direction) {
+                      setState(() {
+                        data.removeAt(i);
+                      });
+                    },
                     child: ListTile(
                       title: _buildTitle(data[i].keyword),
                       subtitle: Text(data[i].redirectURL,
@@ -443,7 +448,7 @@ class _AddDialogState extends State<AddDialog> {
   String _text = '';
   @override
   Widget build(BuildContext context) {
-    final config = Provider.of<Config>(context,listen: false);
+    final config = Provider.of<Config>(context, listen: false);
     return SimpleDialog(title: Text('添加关键字 ${widget.query}'), children: [
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 0),

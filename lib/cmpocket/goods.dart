@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -72,146 +73,187 @@ class _GoodsHomeState extends State<GoodsHome> {
   }
 }
 
-class GoodList extends StatelessWidget {
+class GoodList extends StatefulWidget {
   final List<Good> goods;
-  const GoodList(this.goods);
+  GoodList(this.goods);
+  @override
+  _GoodListState createState() => _GoodListState();
+}
+
+class _GoodListState extends State<GoodList> {
   @override
   Widget build(BuildContext context) {
+    final goods = widget.goods;
     final config = Provider.of<Config>(context, listen: false);
-    return ListView.builder(
+    final map = config.map;
+    Good good; //现在已经排过序了，根据排序结果将其顺序规整化
+    //print('sorting now.');
+    for (int i = 0; i < goods.length; i++) {
+      good = goods[i];
+      map[good.id] = (i + 1) * 300;
+    }
+    final _controller = ScrollController(initialScrollOffset: config.position);
+    config.position = 0.0; //重置保存的位置，下次 longPress 修改保存此值
+    return config.useReorderableListView
+        ? ReorderableListView.builder(
+        itemBuilder: (c, i) =>
+            buildDismissible(i, context, _controller, config, goods),
         itemCount: goods.length,
-        itemBuilder: (c, i) => Dismissible(
-              key: Key(i.toString()),
-              background: Container(
-                child: Row(
+        scrollController: _controller,
+        onReorder: (int o, int n) {
+          if (o < n) n -= 1;
+          final Good old = goods.removeAt(o);
+          //print('Old $old index is $o，new index is $n');
+          goods.insert(n, old);
+          if (n + 1 < goods.length) {
+            final top = n >= 1 ? map[goods[n - 1].id] : 0;
+            final bottom = map[goods[n + 1].id];
+            //print('top is$top, bottom is $bottom');
+            final choose = Random().nextInt(bottom - top) + top; //可能等于顶部值
+            //print('random is $choose');
+            map[old.id] = choose;
+          }
+        })
+        : ListView.builder(
+        controller: _controller,
+        itemCount: goods.length,
+        itemBuilder: (c, i) =>
+            buildDismissible(i, context, _controller, config, goods));
+  }
+
+  Dismissible buildDismissible(int i, BuildContext context,
+      ScrollController _controller, Config config, List<Good> goods) {
+    return Dismissible(
+      key: Key(goods[i].id),
+      background: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Text('长按修改，点击查看'),
+            )
+          ],
+        ),
+      ),
+      secondaryBackground: Container(
+        color: Colors.red,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            SizedBox(width: 30)
+          ],
+        ),
+      ),
+      confirmDismiss: (d) => _handleDismiss(d, goods[i], context),
+      onDismissed: (DismissDirection d) {
+        setState(() => goods.removeAt(i));
+      },
+      child: Card(
+        child: Stack(children: [
+          Opacity(
+            opacity: 0.2,
+            child: Container(
+              color: goods[i].picture != null ? null : Colors.blueGrey,
+              decoration: goods[i].picture != null
+                  ? BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(goods[i].picture),
+                    fit: BoxFit.fitWidth,
+                    colorFilter:
+                    ColorFilter.mode(Colors.white12, BlendMode.color),
+                    alignment: Alignment(0, -0.5),
+                  ))
+                  : null,
+              width: double.infinity,
+              height: 100,
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              final config = Provider.of<Config>(context, listen: false);
+              launch(config.goodsView(goods[i]));
+              if (config.autoCopyToClipboard)
+                FlutterClipboard.copy(config.goodsViewNoToken(goods[i]))
+                    .then((value) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('外部访问链接已拷贝到剪贴板')));
+                });
+            },
+            onLongPress: () {
+              final config = Provider.of<Config>(context, listen: false);
+              config.position = _controller.offset;
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (BuildContext context) {
+                return GoodAdd(goods[i]);
+              }));
+            },
+            child: Container(
+              alignment: Alignment.center,
+              width: double.infinity,
+              height: 100,
+              child: ListTile(
+                tileColor: Colors.transparent,
+                leading: Padding(
+                  padding: const EdgeInsets.only(top: 5, right: 9),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.blueGrey.shade200,
+                    foregroundColor: Colors.white,
+                    child: Text(goods[i].name.substring(0, 1).toUpperCase()),
+                  ),
+                ),
+                horizontalTitleGap: 0,
+                title: RichText(
+                    text: TextSpan(
+                        text: goods[i].name,
+                        style: TextStyle(color: Colors.black, fontSize: 18),
+                        children: [
+                          TextSpan(
+                              text: '  ' +
+                                  DateFormat('yy/M/d').format(
+                                      config.showUpdateButNotCreateTime
+                                          ? goods[i].updateTime
+                                          : goods[i].addTime),
+                              style: TextStyle(color: Colors.grey, fontSize: 12))
+                        ])),
+                subtitle: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: Text('这里什么也没有...'),
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white54),
+                      padding: const EdgeInsets.only(
+                          left: 6, right: 6, top: 1, bottom: 1),
+                      child: Text(
+                          goods[i].importance + ' | ' + goods[i].currentState),
+                    ),
+                    SizedBox(
+                      width: 7,
+                    ),
+                    Expanded(
+                      child: Text(
+                        goods[i].description ?? '',
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.grey.shade700, fontSize: 13),
+                      ),
                     )
                   ],
                 ),
+                trailing: null,
               ),
-              secondaryBackground: Container(
-                color: Colors.red,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 30)
-                  ],
-                ),
-              ),
-              confirmDismiss: (d) => _handleDismiss(d, goods[i], context),
-              child: Card(
-                child: Stack(children: [
-                  Opacity(
-                    opacity: 0.2,
-                    child: Container(
-                      color: goods[i].picture != null ? null : Colors.blueGrey,
-                      decoration: goods[i].picture != null
-                          ? BoxDecoration(
-                              image: DecorationImage(
-                              image: NetworkImage(goods[i].picture),
-                              fit: BoxFit.fitWidth,
-                              colorFilter: ColorFilter.mode(
-                                  Colors.white12, BlendMode.color),
-                              alignment: Alignment(0, -0.5),
-                            ))
-                          : null,
-                      width: double.infinity,
-                      height: 100,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      final config =
-                          Provider.of<Config>(context, listen: false);
-                      launch(config.goodsView(goods[i]));
-                      if (config.autoCopyToClipboard)
-                        FlutterClipboard.copy(config.goodsViewNoToken(goods[i]))
-                            .then((value) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(''
-                                  '访问链接已拷贝到剪贴板（不包含秘钥）')));
-                        });
-                    },
-                    onLongPress: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (BuildContext context) {
-                        return GoodAdd(goods[i]);
-                      }));
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: double.infinity,
-                      height: 100,
-                      child: ListTile(
-                        tileColor: Colors.transparent,
-                        leading: Padding(
-                          padding: const EdgeInsets.only(top: 5, right: 9),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.blueGrey.shade200,
-                            foregroundColor: Colors.white,
-                            child: Text(
-                                goods[i].name.substring(0, 1).toUpperCase()),
-                          ),
-                        ),
-                        horizontalTitleGap: 0,
-                        title: RichText(
-                            text: TextSpan(
-                                text: goods[i].name,
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 18),
-                                children: [
-                              TextSpan(
-                                  text: '  ' +
-                                      DateFormat('yy/M/d').format(
-                                          config.showUpdateButNotCreateTime
-                                              ? goods[i].updateTime
-                                              : goods[i].addTime),
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 12))
-                            ])),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white54),
-                              padding: const EdgeInsets.only(
-                                  left: 6, right: 6, top: 1, bottom: 1),
-                              child: Text(goods[i].importance +
-                                  ' | ' +
-                                  goods[i].currentState),
-                            ),
-                            SizedBox(
-                              width: 7,
-                            ),
-                            Expanded(
-                              child: Text(
-                                goods[i].description ?? '',
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: Colors.grey.shade700, fontSize: 13),
-                              ),
-                            )
-                          ],
-                        ),
-                        trailing: null,
-                      ),
-                    ),
-                  )
-                ]),
-              ),
-            ));
+            ),
+          )
+        ]),
+      ),
+    );
   }
 
   Future<bool> _handleDismiss(
@@ -222,28 +264,28 @@ class GoodList extends StatelessWidget {
         barrierDismissible: false,
         context: context,
         builder: (c) => AlertDialog(
-              title: Text('确认删除 ${good.name} 吗？'),
-              content: Text('此操作不可取消'),
-              actions: [
-                ButtonBar(
-                  children: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: Text('取消')),
-                    TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        child: Text(
-                          '确认',
-                          style: TextStyle(color: Colors.red),
-                        ))
-                  ],
-                )
+          title: Text('确认删除 ${good.name} 吗？'),
+          content: Text('此操作不可取消'),
+          actions: [
+            ButtonBar(
+              children: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text('取消')),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text(
+                      '确认',
+                      style: TextStyle(color: Colors.red),
+                    ))
               ],
-            )).then((value) {
+            )
+          ],
+        )).then((value) {
       if (value) {
         http
             .get(Uri.parse(config.deleteGoodsURL(good.id)))
@@ -259,6 +301,7 @@ class GoodList extends StatelessWidget {
     });
   }
 }
+
 
 class GoodAdd extends StatefulWidget {
   final Good good;
