@@ -1,16 +1,12 @@
 # learn_flutter
 
-Corkine's first flutter learn App
+我的 Flutter 学习仓库，也是 CyberMe APP 的开发仓库，后者整合了 https://go.mazhangjing.com 和 https://status.mazhangjing.com 
+提供的短链接跳转信息统计、查看、修改、删除，个人物品增删改查，个人健康数据上传分析等功能。
 
-## Getting Started
+此仓库使用的所有插件均支持 Android 和 iOS Port，但是开发仓库亦打开了 Flutter 对于 macOS 和 windows 的平台支持。
 
-This project is a starting point for a Flutter application.
+短链接管理功能，后端基于 Play + Slick + H2 开发：
+![](http://static2.mazhangjing.com/20210409/5849a3d_截屏2021-04-09上午10.43.40.png)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+个人物品追踪功能，后端基于 Play + Slick + H2 开发：
+![](http://static2.mazhangjing.com/20210409/c4601f3_截屏2021-04-09上午10.24.13.png)
