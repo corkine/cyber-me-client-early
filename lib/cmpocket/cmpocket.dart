@@ -101,6 +101,9 @@ class _PocketHomeState extends State<PocketHome> {
           ? [
               ElevatedButton(
                 onPressed: () {
+                  final position = config.controller.offset;
+                  config.position =  position + 100;
+                  //此处是一个近似值，因为为了美观在排序时调小了 margin 的值，所以是这个位置
                   config.setUseReorderableListView(false);
                 },
                 child: Row(
@@ -138,6 +141,9 @@ class _PocketHomeState extends State<PocketHome> {
                         return config.setAutoCopyToClipboard(
                             !config.autoCopyToClipboard);
                       case 7:
+                        final position = config.controller.offset;
+                        config.position =  position - 100 >= 0 ? position - 100 : position;
+                        //此处是一个近似值，因为为了美观调小了 margin 的值，所以是这个位置
                         return config.setUseReorderableListView(
                             !config.useReorderableListView);
                       default:

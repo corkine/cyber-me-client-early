@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Config extends ChangeNotifier {
 
-  static const VERSION = 'VERSION 1.1.0, Build#2021-04-09';
+  static const VERSION = 'VERSION 1.1.1, Build#2021-04-10';
   /*
   1.0.4 修复了 Goods 标题显示详情问题，新键项目添加图片表单信息丢失问题，添加/修改返回后列表不更新问题
   1.0.5 修复了 QuickLink 非去重时的数据折叠问题
@@ -18,6 +18,7 @@ class Config extends ChangeNotifier {
   会记录在本地，下次打开后会自动排序。此外修复了 Dismissible 条目删除后短暂停留项目重新回来的问题（Good 和 QuickLink）。
   1.1.0 修复了修改 Good 删除字段时服务端因为没有字段被识别为不修改的错误（现在设置为空字符串），优化了拖拽排序时的卡片间距
   过大割裂感问题。
+  1.1.1 优化了进入可排序 Good 面板前和后自动记录当前位置的问题。
   */
   static const int pageIndex = 1;
 
@@ -70,6 +71,7 @@ class Config extends ChangeNotifier {
   Map<String,int> map = {};
 
   SharedPreferences prefs;
+  ScrollController controller;
 
   _init() async {
     prefs = await SharedPreferences.getInstance();

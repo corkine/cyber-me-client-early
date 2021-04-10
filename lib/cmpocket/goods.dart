@@ -92,8 +92,10 @@ class _GoodListState extends State<GoodList> {
       good = goods[i];
       map[good.id] = (i + 1) * 300;
     }
+    //从长按修改返回后，从编辑顺序返回后刷新并制定旧的滑动位置
     final _controller = ScrollController(initialScrollOffset: config.position);
-    config.position = 0.0; //重置保存的位置，下次 longPress 修改保存此值
+    config.position = 0.0; //重置保存的位置，下次 longPress、进入列表编辑模式后 重新保存此值
+    config.controller = _controller; //每次得到列表都刷新 Controller 对象，确保其是最后列表的 Controller
     return config.useReorderableListView
         ? ReorderableListView.builder(
             buildDefaultDragHandles: true,
