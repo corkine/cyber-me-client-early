@@ -3,6 +3,7 @@ import 'package:learn_flutter/cmpocket/goods.dart';
 import 'package:provider/provider.dart';
 import 'package:learn_flutter/cmpocket/config.dart';
 import 'package:learn_flutter/cmpocket/quicklink.dart';
+import 'package:quick_actions/quick_actions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -102,8 +103,7 @@ class _PocketHomeState extends State<PocketHome> {
               ElevatedButton(
                 onPressed: () {
                   final position = config.controller.offset;
-                  config.position =  position + 100;
-                  //此处是一个近似值，因为为了美观在排序时调小了 margin 的值，所以是这个位置
+                  config.position =  position;
                   config.setUseReorderableListView(false);
                 },
                 child: Row(
@@ -142,8 +142,7 @@ class _PocketHomeState extends State<PocketHome> {
                             !config.autoCopyToClipboard);
                       case 7:
                         final position = config.controller.offset;
-                        config.position =  position - 100 >= 0 ? position - 100 : position;
-                        //此处是一个近似值，因为为了美观调小了 margin 的值，所以是这个位置
+                        config.position =  position;
                         return config.setUseReorderableListView(
                             !config.useReorderableListView);
                       default:
@@ -251,9 +250,26 @@ class _PocketHomeState extends State<PocketHome> {
     prefs.setString('password', pass);
   }
 
+  final QuickActions quickActions = QuickActions();
+
   @override
   void initState() {
     super.initState();
+    quickActions.initialize((shortcutType) {
+      if (shortcutType == 'action_quicklink') {
+        setState(() {
+          _index = 0;
+        });
+      } else if (shortcutType == 'action_add_good') {
+        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
+          return const GoodAdd(null,fromActionCameraFirst: true);
+        }));
+      }
+    });
+    quickActions.setShortcutItems(<ShortcutItem>[
+      const ShortcutItem(type: 'action_quicklink', localizedTitle: '最近短链接'),
+      const ShortcutItem(type: 'action_add_good', localizedTitle: '新物品入库')
+    ]);
   }
 
   @override
@@ -277,7 +293,7 @@ class _PocketHomeState extends State<PocketHome> {
                         accountName: Text('Corkine Ma'),
                         accountEmail: Text('corkine@outlook.com'),
                         currentAccountPicture: FractionalTranslation(
-                            translation: Offset(-0.2, 0.1),
+                            translation: Offset(-0.1, 0.1),
                             child: Icon(
                               Icons.face_unlock_sharp,
                               size: 70,

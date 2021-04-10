@@ -95,7 +95,8 @@ class _GoodListState extends State<GoodList> {
     //从长按修改返回后，从编辑顺序返回后刷新并制定旧的滑动位置
     final _controller = ScrollController(initialScrollOffset: config.position);
     config.position = 0.0; //重置保存的位置，下次 longPress、进入列表编辑模式后 重新保存此值
-    config.controller = _controller; //每次得到列表都刷新 Controller 对象，确保其是最后列表的 Controller
+    config.controller =
+        _controller; //每次得到列表都刷新 Controller 对象，确保其是最后列表的 Controller
     return config.useReorderableListView
         ? ReorderableListView.builder(
             buildDefaultDragHandles: true,
@@ -157,9 +158,7 @@ class _GoodListState extends State<GoodList> {
         setState(() => goods.removeAt(i));
       },
       child: Card(
-        margin: config.useReorderableListView
-            ? EdgeInsets.only(bottom: 1, top: 1)
-            : EdgeInsets.all(4.0),
+        margin: EdgeInsets.only(bottom: 1, top: 1),
         child: Stack(children: [
           Opacity(
             opacity: 0.2,
@@ -314,7 +313,8 @@ class _GoodListState extends State<GoodList> {
 
 class GoodAdd extends StatefulWidget {
   final Good good;
-  const GoodAdd(this.good);
+  final bool fromActionCameraFirst;
+  const GoodAdd(this.good, {this.fromActionCameraFirst = false});
   @override
   _GoodAddState createState() => _GoodAddState();
 }
@@ -329,6 +329,7 @@ class _GoodAddState extends State<GoodAdd> {
   void initState() {
     super.initState();
     _resetRequest();
+    if (widget.fromActionCameraFirst) _handleFetch();
   }
 
   @override
@@ -339,12 +340,26 @@ class _GoodAddState extends State<GoodAdd> {
         title: Text(good == null ? '添加物品' : '修改物品'),
         toolbarHeight: Config.toolBarHeight,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: buildForm(context),
-        ),
-      ),
+      body: _uploading
+          ? Container(
+              alignment: Alignment(0, -0.2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                      height: 13,
+                      width: 13,
+                      child: CircularProgressIndicator(strokeWidth: 1.7)),
+                  SizedBox(width: 10),
+                  Text('正在联系服务器并交换数据...')
+                ],
+              ))
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: buildForm(context),
+              ),
+            ),
     );
   }
 
@@ -599,9 +614,14 @@ class _GoodAddState extends State<GoodAdd> {
     return result;
   }
 
+  bool _uploading = false;
+
   _savingData() async {
     var failed = true;
     if (formKey.currentState.validate()) {
+      setState(() {
+        _uploading = true;
+      });
       try {
         formKey.currentState.save();
         print(request.fields);
@@ -626,6 +646,9 @@ class _GoodAddState extends State<GoodAdd> {
         return result;
       } finally {
         _resetRequest();
+        setState(() {
+          _uploading = false;
+        });
         if (failed)
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text('上传失败')));
