@@ -1,4 +1,6 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:learn_flutter/cmpocket/connect.dart';
 import 'package:learn_flutter/cmpocket/goods.dart';
 import 'package:provider/provider.dart';
 import 'package:learn_flutter/cmpocket/config.dart';
@@ -67,7 +69,7 @@ class _PocketHomeState extends State<PocketHome> {
       case 1:
         return GoodsHome();
       default:
-        return GoodsHome();
+        return Connect();
     }
   }
 
@@ -252,6 +254,19 @@ class _PocketHomeState extends State<PocketHome> {
 
   final QuickActions quickActions = QuickActions();
 
+  _doAddLong() async {
+    var query = await FlutterClipboard.paste();
+    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
+      return AddDialog(query,isShortWord: false);
+    }));
+  }
+
+  _doAddShort() async {
+    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
+      return AddDialog('',isShortWord: true);
+    }));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -264,10 +279,16 @@ class _PocketHomeState extends State<PocketHome> {
         Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
           return const GoodAdd(null,fromActionCameraFirst: true);
         }));
+      } else if (shortcutType == 'action_add_quicklink_long') {
+        _doAddLong();
+      } else if (shortcutType == 'action_add_quicklink_short') {
+        _doAddShort();
       }
     });
     quickActions.setShortcutItems(<ShortcutItem>[
       const ShortcutItem(type: 'action_quicklink', localizedTitle: '最近短链接'),
+      const ShortcutItem(type: 'action_add_quicklink_short', localizedTitle: '添加短链接'),
+      const ShortcutItem(type: 'action_add_quicklink_long', localizedTitle: '从剪贴板添加短链接'),
       const ShortcutItem(type: 'action_add_good', localizedTitle: '新物品入库')
     ]);
   }

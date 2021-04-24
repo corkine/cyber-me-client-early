@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:learn_flutter/cmpocket/data.dart';
@@ -439,30 +440,52 @@ class _SearchResultState extends State<SearchResult> {
 
 class AddDialog extends StatefulWidget {
   final String query;
-  const AddDialog(this.query);
+  final bool isShortWord;
+  AddDialog(this.query, {this.isShortWord: true});
   @override
   _AddDialogState createState() => _AddDialogState();
 }
 
 class _AddDialogState extends State<AddDialog> {
-  String _text = '';
+  String short = '';
+  String long = '';
   @override
   Widget build(BuildContext context) {
+    if (widget.isShortWord) {
+      short = widget.query;
+      long = '';
+    } else {
+      short = '';
+      long = widget.query;
+    }
     final config = Provider.of<Config>(context, listen: false);
-    return SimpleDialog(title: Text('添加关键字 ${widget.query}'), children: [
+    final _s = TextEditingController(text: short);
+    final _l = TextEditingController(text: long);
+    return SimpleDialog(title: Text('添加关键字 $short'), children: [
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 0),
         child: Text(
-          '将原始地址跳转到 ${config.basicURL}/${widget.query}',
+          '将原始地址跳转到 ${config.basicURL}/$short',
           style: TextStyle(fontSize: 12),
         ),
       ),
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 10),
         child: TextField(
+          controller: _l,
           decoration: InputDecoration(labelText: '原始地址'),
           onChanged: (s) {
-            _text = s;
+            long = s;
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 10),
+        child: TextField(
+          controller: _s,
+          decoration: InputDecoration(labelText: '短链接',prefixText: 'mazhangjing.com/'),
+          onChanged: (s) {
+            short = s;
           },
         ),
       ),
@@ -480,8 +503,9 @@ class _AddDialogState extends State<AddDialog> {
   }
 
   _submitData(Config config) {
-    final url = _text;
-    final keywords = widget.query;
+    final url = long;
+    final keywords = short;
+    print("long $long for $short");
     if (url == null || url.isEmpty || keywords == null || keywords.isEmpty) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context)
@@ -504,5 +528,6 @@ class _AddDialogState extends State<AddDialog> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(value.toString())));
       });
+    FlutterClipboard.copy('https://go.mazhangjing.com/$short');
   }
 }
