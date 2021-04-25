@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Config extends ChangeNotifier {
 
-  static const VERSION = 'VERSION 1.1.3, Build#2021-04-24';
+  static const VERSION = 'VERSION 1.1.4, Build#2021-04-25';
   /*
   1.0.4 修复了 Goods 标题显示详情问题，新键项目添加图片表单信息丢失问题，添加/修改返回后列表不更新问题
   1.0.5 修复了 QuickLink 非去重时的数据折叠问题
@@ -21,6 +21,7 @@ class Config extends ChangeNotifier {
   1.1.1 优化了进入可排序 Good 面板前和后自动记录当前位置的问题。
   1.1.2 重新调整了可排序面板和正常面板间距，现在记录的列表位置是精确的。添加了 iOS 和 Android 的长按快速 Action。
   1.1.3 添加了快速 Action 添加短链接，从剪贴板添加短链接的方法，自动将短链接复制到剪贴板
+  1.1.4 添加了快速 Action 添加短链接的自动键盘弹出
   */
   static const int pageIndex = 1;
 

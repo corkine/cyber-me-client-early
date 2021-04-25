@@ -472,6 +472,7 @@ class _AddDialogState extends State<AddDialog> {
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 10),
         child: TextField(
+          autofocus: widget.isShortWord,
           controller: _l,
           decoration: InputDecoration(labelText: '原始地址'),
           onChanged: (s) {
@@ -482,6 +483,7 @@ class _AddDialogState extends State<AddDialog> {
       Padding(
         padding: const EdgeInsets.only(left: 19, right: 19, top: 0, bottom: 10),
         child: TextField(
+          autofocus: !widget.isShortWord,
           controller: _s,
           decoration: InputDecoration(labelText: '短链接',prefixText: 'mazhangjing.com/'),
           onChanged: (s) {
