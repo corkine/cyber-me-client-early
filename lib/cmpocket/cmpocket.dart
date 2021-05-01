@@ -272,9 +272,11 @@ class _PocketHomeState extends State<PocketHome> {
     super.initState();
     quickActions.initialize((shortcutType) {
       if (shortcutType == 'action_quicklink') {
-        setState(() {
+        /*setState(() {
           _index = 0;
-        });
+        });*/
+        Config config = Provider.of<Config>(context,listen: false);
+        showSearch(context: context, delegate: ItemSearchDelegate(config));
       } else if (shortcutType == 'action_add_good') {
         Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext c) {
           return const GoodAdd(null,fromActionCameraFirst: true);
@@ -286,7 +288,7 @@ class _PocketHomeState extends State<PocketHome> {
       }
     });
     quickActions.setShortcutItems(<ShortcutItem>[
-      const ShortcutItem(type: 'action_quicklink', localizedTitle: '最近短链接'),
+      const ShortcutItem(type: 'action_quicklink', localizedTitle: '查找短链接'),
       const ShortcutItem(type: 'action_add_quicklink_short', localizedTitle: '添加短链接'),
       const ShortcutItem(type: 'action_add_quicklink_long', localizedTitle: '从剪贴板添加短链接'),
       const ShortcutItem(type: 'action_add_good', localizedTitle: '新物品入库')
