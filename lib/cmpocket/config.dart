@@ -25,7 +25,7 @@ class Config extends ChangeNotifier {
   1.1.5 修改快速链接 - 最近 为 查找最近链接
   1.1.6 修改默认启动页为短连接
   */
-  static const int pageIndex = 2;
+  static const int pageIndex = 0;
 
   static const headerStyle = TextStyle(fontSize: 20);
   static const smallHeaderStyle = TextStyle(fontSize: 13);
