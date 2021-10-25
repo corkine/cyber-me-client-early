@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Config extends ChangeNotifier {
 
-  static const VERSION = 'VERSION 1.1.5, Build#2021-05-01';
+  static const VERSION = 'VERSION 1.1.6, Build#2021-10-25';
   /*
   1.0.4 修复了 Goods 标题显示详情问题，新键项目添加图片表单信息丢失问题，添加/修改返回后列表不更新问题
   1.0.5 修复了 QuickLink 非去重时的数据折叠问题
@@ -23,8 +23,9 @@ class Config extends ChangeNotifier {
   1.1.3 添加了快速 Action 添加短链接，从剪贴板添加短链接的方法，自动将短链接复制到剪贴板
   1.1.4 添加了快速 Action 添加短链接的自动键盘弹出
   1.1.5 修改快速链接 - 最近 为 查找最近链接
+  1.1.6 修改默认启动页为短连接
   */
-  static const int pageIndex = 1;
+  static const int pageIndex = 2;
 
   static const headerStyle = TextStyle(fontSize: 20);
   static const smallHeaderStyle = TextStyle(fontSize: 13);
